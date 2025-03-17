@@ -78,3 +78,5 @@ android/build/
 
 # Archivos del sistema
 .DS_Store
+
+android/app/.cxx/
