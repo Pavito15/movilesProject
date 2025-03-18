@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/productos.dart';
 import 'producto_item.dart';
-import '../widgets/menu.dart';
+import 'menus/menu.dart';
 
 class HomeWidget extends StatelessWidget {
   const HomeWidget({super.key});
