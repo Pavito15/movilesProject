@@ -87,3 +87,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  assets:
+    - assets/imagenes_home/home1.jpg
+    - assets/imagenes_productos/1.jpg
+    - assets/imagenes_productos/2.jpg
+    - assets/imagenes_productos/3.jpg
+    - assets/imagenes_productos/4.jpg
+    - assets/imagenes_productos/5.jpg
+    - assets/imagenes_productos/6.jpg
+    - assets/imagenes_productos/7.jpg
+    - assets/imagenes_productos/8.jpg
+    - assets/imagenes_productos/9.jpg
+    - assets/iconoproducto.png
