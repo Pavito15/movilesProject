@@ -4,6 +4,7 @@ class CustomTextField extends StatefulWidget {
   final String labelText;
   final TextEditingController? controller;
   final bool isPassword;
+  final bool readOnly;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
@@ -20,6 +21,7 @@ class CustomTextField extends StatefulWidget {
     required this.labelText,
     this.controller,
     this.isPassword = false,
+    this.readOnly = false,
     this.keyboardType = TextInputType.text,
     this.validator,
     this.onChanged,
@@ -43,6 +45,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.controller,
+      readOnly: widget.readOnly,
       obscureText: widget.isPassword ? _obscureText : false,
       keyboardType: widget.keyboardType,
       onChanged: widget.onChanged,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/edit_profile.dart';
+import 'package:project_v1/screens/profile/profile_data.dart';
 
 import 'package:project_v1/widgets/custom_image_avatar.dart';
 import 'package:project_v1/widgets/menus/custom_app_bar.dart';
@@ -15,7 +16,7 @@ class Profile extends StatelessWidget {
       'title': 'Profile',
       'leading': Icons.person_outline_rounded,
       'trailing': Icons.arrow_forward_ios_rounded,
-      'destination': EditProfile()
+      'destination': ProfileData()
     },
     {
       'title': 'Bookmarked',
@@ -46,7 +47,13 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "Profile", onEdit: () {},),
+      appBar: CustomAppBar(
+        title: "Profile",
+        onEdit: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const EditProfile()));
+        },
+      ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
         child: Center(
@@ -87,7 +94,7 @@ class Profile extends StatelessWidget {
                           ),
                           SubtitleText(
                             text: "280",
-                            color: Colors.blueAccent,
+                            color: Color(0xFF0D47A1),
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
                           ),
