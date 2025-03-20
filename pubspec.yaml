@@ -99,3 +99,7 @@ flutter:
     - assets/imagenes_productos/8.jpg
     - assets/imagenes_productos/9.jpg
     - assets/iconoproducto.png
+    - assets/images_icons/apple_icon.png
+    - assets/images_icons/google_icon.png
+    - assets/images_icons/avatar_men.png
+    - assets/images_icons/avatar_women.png
