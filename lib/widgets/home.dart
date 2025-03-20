@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import '../data/productos.dart';
 import 'producto_item.dart';
-import 'menus/menu.dart';
+import 'package:project_v1/widgets/menus/menu.dart';
 
 class HomeWidget extends StatelessWidget {
-  const HomeWidget({super.key});
+  const HomeWidget({super.key, required this.onTabSelected});
+
+  final Function(int) onTabSelected;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(), // Menú lateral en la izquierda
+      drawer: MenuDrawer(carrito: [], onTabSelected: onTabSelected),
       body: Column(
         children: [
           Container(
@@ -23,7 +25,6 @@ class HomeWidget extends StatelessWidget {
               ),
             ),
           ),
-
           PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
             child: AppBar(
@@ -43,25 +44,21 @@ class HomeWidget extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.shopping_cart_outlined),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/cart');
+                    onTabSelected(1);
                   },
                 ),
               ],
             ),
           ),
-
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Imagen principal
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Image.asset('assets/imagenes_home/home1.jpg'),
                   ),
-
-                  // Título principal
                   const Padding(
                     padding: EdgeInsets.all(16),
                     child: Text(
@@ -70,10 +67,10 @@ class HomeWidget extends StatelessWidget {
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                   ),
-
-                  // Botón "Ver productos"
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      onTabSelected(2);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[300],
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
@@ -84,8 +81,6 @@ class HomeWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 40),
-
-                  // Lista horizontal de productos obtenidos de productos.dart
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: SizedBox(

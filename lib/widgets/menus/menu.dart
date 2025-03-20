@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:project_v1/models/productos.dart';
 
 class MenuDrawer extends StatelessWidget {
-  const MenuDrawer({super.key});
+  final List<Producto> carrito;
+  final void Function(int index) onTabSelected;
+
+  const MenuDrawer({super.key, required this.carrito, required this.onTabSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -11,18 +15,18 @@ class MenuDrawer extends StatelessWidget {
         children: [
           ListTile(
             leading: Image.asset('assets/iconoproducto.png', width: 30, height: 30),
-            title: Text('Productos'),
+            title: const Text('Productos'),
             onTap: () {
-              // Navegar a la pantalla de productos
-              Navigator.pushNamed(context, '/productos');
+              Navigator.pop(context); 
+              onTabSelected(2); 
             },
           ),
           ListTile(
-            leading: Icon(Icons.shopping_cart, size: 30),
-            title: Text('Carrito'),
+            leading: const Icon(Icons.shopping_cart, size: 30),
+            title: const Text('Carrito'),
             onTap: () {
-              // Navegar a la pantalla del carrito
-              Navigator.pushNamed(context, '/carrito');
+              Navigator.pop(context); 
+              onTabSelected(1); 
             },
           ),
         ],
