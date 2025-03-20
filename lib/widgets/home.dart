@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:project_v1/screens/productos.dart';
-import 'package:project_v1/screens/shoppyCar.dart';
 import '../data/productos.dart';
 import 'producto_item.dart';
-import 'menus/menu.dart';
+import 'package:project_v1/widgets/menus/menu.dart';
 
 class HomeWidget extends StatelessWidget {
-  const HomeWidget({super.key});
+  const HomeWidget({super.key, required this.onTabSelected});
+
+  final Function(int) onTabSelected;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MenuDrawer(carrito: [],),
+      drawer: MenuDrawer(carrito: [], onTabSelected: onTabSelected),
       body: Column(
         children: [
           Container(
@@ -44,10 +44,7 @@ class HomeWidget extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.shopping_cart_outlined),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ShoppyCar(carrito: [],)),
-                    );
+                    onTabSelected(1);
                   },
                 ),
               ],
@@ -72,10 +69,7 @@ class HomeWidget extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ProductosScreen()),
-                      );
+                      onTabSelected(2);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[300],

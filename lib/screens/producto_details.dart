@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
+import 'package:project_v1/screens/Tab/tabs.dart';
 import '../models/productos.dart';
+
 
 class DetalleProductoScreen extends StatefulWidget {
   const DetalleProductoScreen({super.key, required this.producto});
@@ -12,6 +14,16 @@ class DetalleProductoScreen extends StatefulWidget {
 
 class DetalleProductoScreenState extends State<DetalleProductoScreen> {
   int cantidad = 1;
+  int _selectedPageIndex = 2; // Indica que estamos en la pestaña de "Productos"
+
+  void _selectPage(int index) {
+    if (index == _selectedPageIndex) return; // Si ya está en la pestaña, no hacer nada
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const TabsScreen()), // Regresa a TabsScreen
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,18 +81,18 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                           ),
                           Row(
                             children: [
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    if (cantidad > 1) cantidad--;
-                                  });
-                                },
-                                icon: const Icon(Icons.remove, color: Colors.white),
-                                style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(Colors.blue.shade900),
-                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade900,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (cantidad > 1) cantidad--;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.remove, color: Colors.white),
                                 ),
                               ),
                               Container(
@@ -94,18 +106,18 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    cantidad++;
-                                  });
-                                },
-                                icon: const Icon(Icons.add, color: Colors.white),
-                                style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(Colors.blue.shade900),
-                                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade900,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      cantidad++;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add, color: Colors.white),
                                 ),
                               ),
                             ],
@@ -168,6 +180,17 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
             const SizedBox(height: 20),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _selectPage,
+        currentIndex: _selectedPageIndex,
+        selectedItemColor: Colors.blue.shade900,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Carrito'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Productos'),
+        ],
       ),
     );
   }

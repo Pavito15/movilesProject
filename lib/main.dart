@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:project_v1/screens/Tab/tabs.dart';
 import 'package:project_v1/screens/login/signin.dart';
-import '../screens/home_screens.dart';
 
 void main() => runApp(const MyApp());
 
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const HomeScreen(),
+        '/': (context) => const TabsScreen(), // Se inicia con TabsScreen
         '/profile': (context) => const Signin(),
       },
     );

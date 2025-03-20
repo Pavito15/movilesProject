@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; 
 import '../models/productos.dart';
 import '../screens/producto_details.dart';
+
 class ProductoItem extends StatelessWidget {
   const ProductoItem({super.key, required this.producto});
 
@@ -13,7 +14,7 @@ class ProductoItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetalleProductoScreen(producto: producto),
+            builder: (context) => DetalleProductoScreen(producto: producto), // ✅ Se eliminó `onProductSelected`
           ),
         );
       },
