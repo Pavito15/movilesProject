@@ -28,9 +28,8 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
       );
 
       // Aquí puedes manejar el nuevo producto, como enviarlo a una base de datos o lista
-      print('Producto agregado: ${nuevoProducto.nombre}');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Producto agregado exitosamente')),
+        SnackBar(content: Text('Producto "${nuevoProducto.nombre}" agregado exitosamente')),
       );
 
       // Limpiar los campos

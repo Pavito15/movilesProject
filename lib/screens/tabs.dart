@@ -6,15 +6,22 @@ import 'package:project_v1/models/productos.dart';
 import 'package:project_v1/widgets/menus/menu.dart';
 
 class TabsScreen extends StatefulWidget {
-  const TabsScreen({super.key});
+  final int initialIndex;
+  const TabsScreen({super.key, this.initialIndex = 0});
 
   @override
   State<TabsScreen> createState() => _TabsScreenState();
 }
 
 class _TabsScreenState extends State<TabsScreen> {
-  int _selectedPageIndex = 0;
+  late int _selectedPageIndex;
   final List<Producto> carrito = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPageIndex = widget.initialIndex;
+  }
 
   void _selectPage(int index) {
     setState(() {
@@ -50,3 +57,4 @@ class _TabsScreenState extends State<TabsScreen> {
     );
   }
 }
+
