@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
+import '../screens/Payment/pay.dart';
 
 class ShoppyCar extends StatefulWidget {
-  const ShoppyCar({super.key, required List<Producto> carrito});
+  const ShoppyCar({super.key, required this.carrito});
+
+  final List<Producto> carrito;
 
   @override
   _ShoppyCarState createState() => _ShoppyCarState();
@@ -43,6 +46,14 @@ class _ShoppyCarState extends State<ShoppyCar> {
     }
   }
 
+  double calcularTotal() {
+    double total = 0.0;
+    for (var producto in productos) {
+      total += producto.precio * cantidades[producto.id]!;
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,7 +78,7 @@ class _ShoppyCarState extends State<ShoppyCar> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 20),
-            
+
             Expanded(
               child: ListView.builder(
                 itemCount: productos.length,
@@ -105,11 +116,6 @@ class _ShoppyCarState extends State<ShoppyCar> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '30 ml',
-                                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -158,6 +164,54 @@ class _ShoppyCarState extends State<ShoppyCar> {
                 },
               ),
             ),
+
+            // Total de compra
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Total:",
+                      style: TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("\$${calcularTotal().toStringAsFixed(2)}",
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Botón para proceder al pago
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentScreen(totalCompra: calcularTotal()),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade900,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Proceder al pago',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

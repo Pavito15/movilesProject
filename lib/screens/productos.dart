@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import '../data/productos.dart';
 import '../models/productos.dart';
+import 'producto_details.dart';
 
 class ProductosScreen extends StatelessWidget {
-  final Function(Producto) onProductSelected; // Declaración del parámetro requerido
+  final Function(Producto) onProductSelected; // Parámetro requerido para la navegación
 
-  const ProductosScreen({super.key, required this.onProductSelected}); // Se asegura que sea obligatorio
+  const ProductosScreen({super.key, required this.onProductSelected}); 
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width; 
+    final double buttonWidth = screenWidth * 0.35; 
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos', style: TextStyle(color: Colors.black)),
@@ -20,16 +24,24 @@ class ProductosScreen extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+            crossAxisCount: 2, 
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 0.7,
+            childAspectRatio: 0.75, 
           ),
           itemCount: dataProductos.length,
           itemBuilder: (context, index) {
             final Producto producto = dataProductos[index];
+
             return GestureDetector(
-              onTap: () => onProductSelected(producto), // Llama la función cuando se selecciona un producto
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetalleProductoScreen(producto: producto),
+                  ),
+                );
+              },
               child: Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -47,6 +59,8 @@ class ProductosScreen extends StatelessWidget {
                         ),
                         child: Image.asset(
                           producto.imagen,
+                          width: screenWidth * 0.4, // Responsivo
+                          height: screenWidth * 0.4, 
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -73,36 +87,39 @@ class ProductosScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          ElevatedButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Producto agregado'),
-                                    content: const Text('Se agregó al carrito correctamente.'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                          SizedBox(
+                            width: buttonWidth, // Hace que el botón sea más ancho
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Producto agregado'),
+                                      content: const Text('Se agregó al carrito correctamente.'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                backgroundColor: Colors.blue.shade800,
+                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                               ),
-                              backgroundColor: Colors.blue.shade800,
-                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                            ),
-                            child: const Text(
-                              'Agregar al carrito',
-                              style: TextStyle(color: Colors.white, fontSize: 14),
+                              child: const Text(
+                                'Agregar al carrito',
+                                style: TextStyle(color: Colors.white, fontSize: 14),
+                              ),
                             ),
                           ),
                         ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_v1/screens/Tab/tabs.dart';
+import 'package:project_v1/screens/tabs.dart';
 import 'package:project_v1/screens/login/signin.dart';
 
 void main() => runApp(const MyApp());
