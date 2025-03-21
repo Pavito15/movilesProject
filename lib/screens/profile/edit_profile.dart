@@ -44,7 +44,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
             );
             Navigator.pop(context,
-                MaterialPageRoute(builder: (context) => const Profile()));
+                MaterialPageRoute(builder: (context) =>  Profile()));
           },
           textColor: Color(0xFF0D47A1),
           fontWeight: FontWeight.w800,
