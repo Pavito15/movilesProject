@@ -14,7 +14,7 @@ class ProductoItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetalleProductoScreen(producto: producto), // ✅ Se eliminó `onProductSelected`
+            builder: (context) => DetalleProductoScreen(producto: producto), 
           ),
         );
       },

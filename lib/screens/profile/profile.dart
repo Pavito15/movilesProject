@@ -8,6 +8,9 @@ import 'package:project_v1/widgets/menus/custom_app_bar.dart';
 import 'package:project_v1/widgets/menus/custom_menu_profile.dart';
 import 'package:project_v1/widgets/texts/customs_texts.dart';
 
+import 'package:project_v1/widgets/admin/admin_widget.dart';
+
+
 class Profile extends StatelessWidget {
   const Profile({super.key});
 
@@ -17,18 +20,6 @@ class Profile extends StatelessWidget {
       'leading': Icons.person_outline_rounded,
       'trailing': Icons.arrow_forward_ios_rounded,
       'destination': ProfileData()
-    },
-    {
-      'title': 'Bookmarked',
-      'leading': Icons.bookmark_outline_rounded,
-      'trailing': Icons.arrow_forward_ios_rounded,
-      'destination': Signin()
-    },
-    {
-      'title': 'Previous Trips',
-      'leading': Icons.mode_of_travel_outlined,
-      'trailing': Icons.arrow_forward_ios_rounded,
-      'destination': Signin()
     },
     {
       'title': 'Settings',
@@ -42,6 +33,12 @@ class Profile extends StatelessWidget {
       'trailing': Icons.arrow_forward_ios_rounded,
       'destination': Signin()
     },
+    {
+      'title': 'Admin Panel',
+      'leading': Icons.admin_panel_settings_outlined,
+      'trailing': Icons.arrow_forward_ios_rounded,
+      'destination': AdminWidget()
+    }
   ];
 
   @override
@@ -73,32 +70,6 @@ class Profile extends StatelessWidget {
               ),
               SizedBox(
                 height: 20.0,
-              ),
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                color: Colors.white,
-                elevation: 2,
-                child: SizedBox(
-                    width: double.infinity,
-                    height: 80.0,
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SubtitleText(
-                            text: "Reward Points",
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          SubtitleText(
-                            text: "280",
-                            color: Color(0xFF0D47A1),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ])),
               ),
               SizedBox(
                 height: 20,
