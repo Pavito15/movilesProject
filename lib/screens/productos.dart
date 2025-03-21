@@ -4,14 +4,14 @@ import '../models/productos.dart';
 import 'producto_details.dart';
 
 class ProductosScreen extends StatelessWidget {
-  final Function(Producto) onProductSelected; // Parámetro requerido para la navegación
+  final Function(Producto) onProductSelected;
 
-  const ProductosScreen({super.key, required this.onProductSelected}); 
+  const ProductosScreen({super.key, required this.onProductSelected});
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width; 
-    final double buttonWidth = screenWidth * 0.35; 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double buttonWidth = screenWidth * 0.35;
 
     return Scaffold(
       appBar: AppBar(
@@ -23,52 +23,55 @@ class ProductosScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, 
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 0.75, 
-          ),
           itemCount: dataProductos.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.65, // Ajustado para mejor visual
+          ),
           itemBuilder: (context, index) {
             final Producto producto = dataProductos[index];
 
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetalleProductoScreen(producto: producto),
-                  ),
-                );
-              },
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: Colors.blueAccent, width: 1),
-                ),
-                color: Colors.white,
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Colors.blueAccent, width: 1),
+              ),
+              color: Colors.white,
+              elevation: 3,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DetalleProductoScreen(producto: producto),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                        child: Image.asset(
-                          producto.imagen,
-                          width: screenWidth * 0.4, // Responsivo
-                          height: screenWidth * 0.4, 
-                          fit: BoxFit.cover,
-                        ),
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                      child: Image.asset(
+                        producto.imagen,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.broken_image, size: 80, color: Colors.grey);
+                        },
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             producto.nombre,
@@ -78,7 +81,7 @@ class ProductosScreen extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 6),
                           Text(
                             '\$${producto.precio.toStringAsFixed(2)}',
                             style: const TextStyle(
@@ -86,9 +89,9 @@ class ProductosScreen extends StatelessWidget {
                               color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
                           SizedBox(
-                            width: buttonWidth, // Hace que el botón sea más ancho
+                            width: buttonWidth,
                             child: ElevatedButton(
                               onPressed: () {
                                 showDialog(
@@ -110,18 +113,19 @@ class ProductosScreen extends StatelessWidget {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
                                 backgroundColor: Colors.blue.shade800,
-                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                               ),
                               child: const Text(
                                 'Agregar al carrito',
-                                style: TextStyle(color: Colors.white, fontSize: 14),
+                                style: TextStyle(fontSize: 13, color: Colors.white),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          ),
+                          )
                         ],
                       ),
                     ),
