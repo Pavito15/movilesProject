@@ -15,7 +15,7 @@ class DetalleProductoScreen extends StatefulWidget {
 
 class DetalleProductoScreenState extends State<DetalleProductoScreen> {
   int cantidad = 1;
-  int _selectedPageIndex = 2; // Indica que estamos en la pestaña de "Productos"
+  final int _selectedPageIndex = 2; // Indica que estamos en la pestaña de "Productos"
 
   void _selectPage(int index) {
     if (index == _selectedPageIndex) return; // Si ya está en la pestaña, no hacer nada

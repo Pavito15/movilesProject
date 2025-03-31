@@ -4,8 +4,8 @@ import 'package:project_v1/widgets/texts/customs_texts.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onEdit;
-  final Widget? actionWidget; // nuevo parámetro para acción personalizada
-
+  final Widget? actionWidget; 
+  
   const CustomAppBar({
     super.key,
     required this.title,

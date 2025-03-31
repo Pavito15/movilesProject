@@ -14,7 +14,6 @@ class RecoveryPassword extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(15, 15, 15, 0),
