@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Importa Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:project_v1/widgets/buttons/custom_icon_button.dart';
 import 'package:project_v1/widgets/buttons/custom_text_button.dart';
 import 'package:project_v1/widgets/buttons/primary_button.dart';
@@ -17,13 +18,13 @@ class _SignupState extends State<Signup> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
-      TextEditingController(); // Nuevo controlador
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Instancia de FirebaseAuth
-  String? _errorMessage; // Para manejar errores
+      TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  String? _errorMessage;
 
-  // Función para registrar un nuevo usuario con Firebase
+  // Función para registrar con email y contraseña
   Future<void> _signUp() async {
-    // Verifica que las contraseñas coincidan
     if (_passwordController.text.trim() !=
         _confirmPasswordController.text.trim()) {
       setState(() {
@@ -37,29 +38,75 @@ class _SignupState extends State<Signup> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // Verifica si el widget sigue montado antes de navegar
       if (mounted) {
-        Navigator.pushReplacementNamed(
-            context, '/main'); // Navega a la pantalla principal
+        Navigator.pushReplacementNamed(context, '/main');
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = _getErrorMessage(e.code); // Manejo de errores
+          _errorMessage = _getErrorMessage(e.code);
         });
       }
     }
   }
 
-  // Función para obtener mensajes de error personalizados
+  // Función para registrarse con Google
+  Future<void> _signUpWithGoogle() async {
+    try {
+      // Cierra la sesión anterior de Google para forzar el selector de cuentas
+      await _googleSignIn.signOut();
+
+      // Inicia el flujo de autenticación de Google
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        setState(() {
+          _errorMessage = 'Registro cancelado';
+        });
+        return;
+      }
+
+      // Obtiene las credenciales de autenticación
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Crea una credencial para Firebase
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Intenta registrar/iniciar sesión con la credencial
+      await _auth.signInWithCredential(credential);
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = _getErrorMessage(e.code);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error al registrar con Google: $e';
+        });
+      }
+    }
+  }
+
   String _getErrorMessage(String code) {
     switch (code) {
       case 'email-already-in-use':
-        return 'El correo ya está registrado.';
+        return 'El correo ya está registrado. Usa Sign In.';
       case 'invalid-email':
         return 'El correo electrónico no es válido.';
       case 'weak-password':
         return 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+      case 'account-exists-with-different-credential':
+        return 'La cuenta ya existe con un método de inicio diferente. Usa Sign In.';
       default:
         return 'Ocurrió un error. Inténtalo de nuevo.';
     }
@@ -69,7 +116,7 @@ class _SignupState extends State<Signup> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose(); // Libera el nuevo controlador
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -95,23 +142,22 @@ class _SignupState extends State<Signup> {
               const SizedBox(height: 40.0),
               CustomTextField(
                 labelText: "Email",
-                controller: _emailController, // Asigna el controlador
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 25.0),
               CustomTextField(
                 labelText: "Password",
-                controller: _passwordController, // Asigna el controlador
+                controller: _passwordController,
                 isPassword: true,
               ),
               const SizedBox(height: 25.0),
               CustomTextField(
                 labelText: "Confirm Password",
-                controller: _confirmPasswordController, // Asigna el controlador
+                controller: _confirmPasswordController,
                 isPassword: true,
               ),
-              if (_errorMessage !=
-                  null) // Muestra el mensaje de error si existe
+              if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Text(
@@ -122,7 +168,7 @@ class _SignupState extends State<Signup> {
               const SizedBox(height: 50.0),
               PrimaryButton(
                 text: "Sign Up",
-                onPressed: _signUp, // Llama a la función de registro
+                onPressed: _signUp,
               ),
               const SizedBox(height: 30),
               Row(
@@ -132,7 +178,7 @@ class _SignupState extends State<Signup> {
                   CustomTextButton(
                     text: "Sign In",
                     onPressed: () {
-                      Navigator.pop(context); // Regresa a Signin
+                      Navigator.pop(context);
                     },
                   ),
                 ],
@@ -164,15 +210,7 @@ class _SignupState extends State<Signup> {
                 children: [
                   CustomIconButton(
                     imagePath: "assets/images_icons/google_icon.png",
-                    onPressed: () {
-                      // Aquí puedes agregar la lógica para Google Sign-Up
-                    },
-                  ),
-                  CustomIconButton(
-                    imagePath: "assets/images_icons/apple_icon.png",
-                    onPressed: () {
-                      // Aquí puedes agregar la lógica para Apple Sign-Up
-                    },
+                    onPressed: _signUpWithGoogle,
                   ),
                 ],
               ),

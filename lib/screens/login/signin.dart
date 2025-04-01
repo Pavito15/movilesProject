@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Importa Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:project_v1/screens/login/signup.dart';
 import 'package:project_v1/screens/login/recovery_password.dart';
 import 'package:project_v1/widgets/buttons/custom_icon_button.dart';
@@ -18,24 +19,66 @@ class Signin extends StatefulWidget {
 class _SigninState extends State<Signin> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance; // Instancia de FirebaseAuth
-  String? _errorMessage; // Para manejar errores
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  String? _errorMessage;
 
-  // Función para iniciar sesión con Firebase
+  // Sign in email y contraseña
   Future<void> _signIn() async {
     try {
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // Verifica si el widget sigue montado antes de navegar
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/main'); // Navega a TabsScreen
+        Navigator.pushReplacementNamed(context, '/main');
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = _getErrorMessage(e.code); // Manejo de errores
+          _errorMessage = _getErrorMessage(e.code);
+        });
+      }
+    }
+  }
+
+  // Sign in with Google
+  Future<void> _signInWithGoogle() async {
+    try {
+      // Close the session to enforce the account selector
+      await _googleSignIn.signOut();
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        setState(() {
+          _errorMessage = 'Inicio de sesión cancelado';
+        });
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/main');
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = _getErrorMessage(e.code);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error al iniciar sesión con Google: $e';
         });
       }
     }
@@ -50,6 +93,8 @@ class _SigninState extends State<Signin> {
         return 'Contraseña incorrecta.';
       case 'invalid-email':
         return 'El correo electrónico no es válido.';
+      case 'account-exists-with-different-credential':
+        return 'La cuenta ya existe con un método de inicio diferente.';
       default:
         return 'Ocurrió un error. Inténtalo de nuevo.';
     }
@@ -83,13 +128,13 @@ class _SigninState extends State<Signin> {
               const SizedBox(height: 40.0),
               CustomTextField(
                 labelText: "Email",
-                controller: _emailController, // Asigna el controlador
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 25.0),
               CustomTextField(
                 labelText: 'Password',
-                controller: _passwordController, // Asigna el controlador
+                controller: _passwordController,
                 isPassword: true,
               ),
               Align(
@@ -106,8 +151,7 @@ class _SigninState extends State<Signin> {
                   text: "Forgot Password?",
                 ),
               ),
-              if (_errorMessage !=
-                  null) // Muestra el mensaje de error si existe
+              if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Text(
@@ -118,7 +162,7 @@ class _SigninState extends State<Signin> {
               const SizedBox(height: 30.0),
               PrimaryButton(
                 text: "Sign In",
-                onPressed: _signIn, // Llama a la función de inicio de sesión
+                onPressed: _signIn,
               ),
               const SizedBox(height: 30),
               Row(
@@ -165,15 +209,8 @@ class _SigninState extends State<Signin> {
                 children: [
                   CustomIconButton(
                     imagePath: "assets/images_icons/google_icon.png",
-                    onPressed: () {
-                      // Aquí puedes agregar la lógica para Google Sign-In
-                    },
-                  ),
-                  CustomIconButton(
-                    imagePath: "assets/images_icons/apple_icon.png",
-                    onPressed: () {
-                      // Aquí puedes agregar la lógica para Apple Sign-In
-                    },
+                    onPressed:
+                        _signInWithGoogle, // Llama a la función de Google Sign-In
                   ),
                 ],
               ),
