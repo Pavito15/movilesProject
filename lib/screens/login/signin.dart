@@ -23,7 +23,7 @@ class _SigninState extends State<Signin> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   String? _errorMessage;
 
-  // Sign in email y contraseña
+  // Sign in con email y contraseña
   Future<void> _signIn() async {
     try {
       await _auth.signInWithEmailAndPassword(
@@ -39,15 +39,19 @@ class _SigninState extends State<Signin> {
           _errorMessage = _getErrorMessage(e.code);
         });
       }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error inesperado: $e';
+        });
+      }
     }
   }
 
-  // Sign in with Google
+  // Sign in con Google
   Future<void> _signInWithGoogle() async {
     try {
-      // Close the session to enforce the account selector
       await _googleSignIn.signOut();
-
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -87,16 +91,16 @@ class _SigninState extends State<Signin> {
   // Función para obtener mensajes de error personalizados
   String _getErrorMessage(String code) {
     switch (code) {
-      case 'user-not-found':
-        return 'No se encontró un usuario con ese correo.';
-      case 'wrong-password':
-        return 'Contraseña incorrecta.';
       case 'invalid-email':
         return 'El correo electrónico no es válido.';
       case 'account-exists-with-different-credential':
         return 'La cuenta ya existe con un método de inicio diferente.';
+      case 'invalid-credential':
+        return 'Las credenciales no son válidas. Revisa tu correo o contraseña.';
+      case 'too-many-requests':
+        return 'Demasiados intentos fallidos. Intenta de nuevo más tarde.';
       default:
-        return 'Ocurrió un error. Inténtalo de nuevo.';
+        return 'Ocurrió un error: $code. Inténtalo de nuevo.';
     }
   }
 
@@ -209,8 +213,7 @@ class _SigninState extends State<Signin> {
                 children: [
                   CustomIconButton(
                     imagePath: "assets/images_icons/google_icon.png",
-                    onPressed:
-                        _signInWithGoogle, // Llama a la función de Google Sign-In
+                    onPressed: _signInWithGoogle,
                   ),
                 ],
               ),
