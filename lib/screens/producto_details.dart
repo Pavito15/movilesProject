@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:project_v1/screens/tabs.dart';
+import 'package:provider/provider.dart';
 import '../models/productos.dart';
+import '../provider/cardProvider.dart';
 
 class DetalleProductoScreen extends StatefulWidget {
   const DetalleProductoScreen({super.key, required this.producto});
@@ -13,19 +14,11 @@ class DetalleProductoScreen extends StatefulWidget {
 
 class DetalleProductoScreenState extends State<DetalleProductoScreen> {
   int cantidad = 1;
-  int _selectedPageIndex = 2;
-
-  void _selectPage(int index) {
-    if (index == _selectedPageIndex) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const TabsScreen()),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -95,12 +88,30 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                           ),
                           const SizedBox(height: 4),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildQuantityButton(Icons.remove, () {
-                                setState(() {
-                                  if (cantidad > 1) cantidad--;
-                                });
-                              }),
+                              // Botón de restar
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade900,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (cantidad > 1) cantidad--;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.remove),
+                                  color: Colors.white,
+                                  iconSize: 20,
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.zero,
+                                ),
+                              ),
+                              // Cuadro azul que muestra la cantidad
                               Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 8),
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -108,16 +119,37 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                                   color: Colors.blue.shade900,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
+                                alignment: Alignment.center,
                                 child: Text(
                                   cantidad.toString(),
-                                  style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                              _buildQuantityButton(Icons.add, () {
-                                setState(() {
-                                  cantidad++;
-                                });
-                              }),
+                              // Botón de sumar
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade900,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      cantidad++;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add),
+                                  color: Colors.white,
+                                  iconSize: 20,
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.zero,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -131,6 +163,9 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
+                        for (int i = 0; i < cantidad; i++) {
+                          cartProvider.addToCart(widget.producto);
+                        }
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -182,34 +217,6 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
             const SizedBox(height: 20),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: _selectPage,
-        currentIndex: _selectedPageIndex,
-        selectedItemColor: Colors.blue.shade900,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Carrito'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Productos'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuantityButton(IconData icon, VoidCallback onPressed) {
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade900,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }

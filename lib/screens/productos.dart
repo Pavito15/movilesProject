@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../data/productos.dart';
 import '../models/productos.dart';
+import '../provider/cardProvider.dart';
 import 'producto_details.dart';
 
 class ProductosScreen extends StatelessWidget {
-  final Function(Producto) onProductSelected;
-
-  const ProductosScreen({super.key, required this.onProductSelected});
+  const ProductosScreen({super.key, required Null Function(dynamic producto) onProductSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class ProductosScreen extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 0.8,
+            childAspectRatio: 0.6,
           ),
           itemBuilder: (context, index) {
             final Producto producto = dataProductos[index];
@@ -51,74 +51,71 @@ class ProductosScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Imagen proporcional y completa
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                      ),
-                      child: AspectRatio(
-                        aspectRatio: 1, // cuadrado
-                        child: Container(
-                          color: Colors.white,
-                          child: Image.asset(
-                            producto.imagen,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.broken_image,
-                                  size: 80, color: Colors.grey);
-                            },
+                    // Imagen del producto
+                    Expanded(
+                      flex: 5,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                        ),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Container(
+                            color: Colors.white,
+                            child: Image.asset(
+                              producto.imagen,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.broken_image,
+                                    size: 60, color: Colors.grey);
+                              },
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          // Nombre del producto
-                          Text(
-                            producto.nombre,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                    // Información del producto
+                    Expanded(
+                      flex: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Nombre del producto
+                            Text(
+                              producto.nombre,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          // Precio del producto
-                          Text(
-                            '\$${producto.precio.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.black87,
+                            // Precio del producto
+                            Text(
+                              '\$${producto.precio.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black87,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          // Botón "Añadir" responsivo
-                          Align(
-                            alignment: Alignment.center,
-                            child: FractionallySizedBox(
-                              widthFactor: 0.9,
+                            // Botón "Añadir al carrito"
+                            FractionallySizedBox(
+                              widthFactor: 0.8,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Producto agregado'),
-                                        content: const Text(
-                                            'Se agregó al carrito correctamente.'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Text('OK'),
-                                          ),
-                                        ],
-                                      );
-                                    },
+                                  Provider.of<CartProvider>(context,
+                                          listen: false)
+                                      .addToCart(producto); // Añade al carrito
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          '${producto.nombre} añadido al carrito'),
+                                      duration: const Duration(seconds: 2),
+                                    ),
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -127,21 +124,21 @@ class ProductosScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
+                                    vertical: 8,
                                   ),
                                 ),
                                 child: const Text(
-                                  'Añadir al carrito',
+                                  'Añadir',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     color: Colors.white,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],

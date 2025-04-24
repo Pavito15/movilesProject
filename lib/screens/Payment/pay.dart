@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:project_v1/provider/cardProvider.dart';
+import 'package:provider/provider.dart';
 import 'package:project_v1/widgets/menus/custom_app_bar.dart';
 import 'package:project_v1/widgets/texts/custom_text_field.dart';
 import 'package:project_v1/widgets/buttons/primary_button.dart';
+
 
 class PaymentScreen extends StatefulWidget {
   final double totalCompra; // Se recibe el total de la compra
@@ -21,14 +24,36 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _stateController = TextEditingController();
-  String? _selectedCountry;
+  final TextEditingController _cardNumberController = TextEditingController();
+  final TextEditingController _expiryDateController = TextEditingController();
+  final TextEditingController _cvvController = TextEditingController();
+  final TextEditingController _cardHolderNameController = TextEditingController();
 
+  String? _selectedCountry;
   final List<String> _countries = ['Canadá', 'México', 'EE.UU.'];
 
   void _processPayment() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Procesando pago...')),
+      // Mostrar alerta de confirmación
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Pago exitoso"),
+            content: const Text("El producto ha sido pagado correctamente."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  // Vaciar el carrito
+                  Provider.of<CartProvider>(context, listen: false).clearCart();
+                  Navigator.of(context).pop(); // Cerrar el diálogo
+                  Navigator.of(context).pop(); // Regresar a la pantalla anterior
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
       );
     }
   }
@@ -134,6 +159,55 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
               const SizedBox(height: 20),
 
+              // Sección desplegable para tarjeta de crédito
+              ExpansionTile(
+                title: const Text(
+                  "Añadir tarjeta de crédito",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                children: [
+                  const Text("Número de tarjeta"),
+                  CustomTextField(
+                    labelText: "Ingresa el número de tarjeta",
+                    controller: _cardNumberController,
+                    keyboardType: TextInputType.number,
+                    validator: (value) =>
+                        value!.isEmpty ? "Este campo es obligatorio" : null,
+                  ),
+                  const SizedBox(height: 15),
+
+                  const Text("Fecha de expiración"),
+                  CustomTextField(
+                    labelText: "MM/AA",
+                    controller: _expiryDateController,
+                    keyboardType: TextInputType.datetime,
+                    validator: (value) =>
+                        value!.isEmpty ? "Este campo es obligatorio" : null,
+                  ),
+                  const SizedBox(height: 15),
+
+                  const Text("CVV"),
+                  CustomTextField(
+                    labelText: "Código de seguridad",
+                    controller: _cvvController,
+                    keyboardType: TextInputType.number,
+                    validator: (value) =>
+                        value!.isEmpty ? "Este campo es obligatorio" : null,
+                  ),
+                  const SizedBox(height: 15),
+
+                  const Text("Nombre del titular"),
+                  CustomTextField(
+                    labelText: "Ingresa el nombre del titular",
+                    controller: _cardHolderNameController,
+                    validator: (value) =>
+                        value!.isEmpty ? "Este campo es obligatorio" : null,
+                  ),
+                  const SizedBox(height: 15),
+                ],
+              ),
+              const SizedBox(height: 20),
+
               // Total de compra
               Container(
                 padding: const EdgeInsets.all(12),
@@ -157,7 +231,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
               // Botón de pago
               PrimaryButton(
-                text: "Método de Pago",
+                text: "Pagar",
                 onPressed: _processPayment,
               ),
             ],

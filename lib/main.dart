@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:project_v1/provider/cardProvider.dart';
 import 'package:project_v1/screens/tabs.dart';
 import 'package:project_v1/screens/login/signin.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()), // Registra el CartProvider
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
