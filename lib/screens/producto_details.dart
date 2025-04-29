@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_v1/screens/tabs.dart';
 import 'package:provider/provider.dart';
 import '../models/productos.dart';
 import '../provider/cardProvider.dart';
@@ -14,6 +15,16 @@ class DetalleProductoScreen extends StatefulWidget {
 
 class DetalleProductoScreenState extends State<DetalleProductoScreen> {
   int cantidad = 1;
+  final int _selectedPageIndex = 2; // Indica que estamos en la pestaña de "Productos"
+
+  void _selectPage(int index) {
+    if (index == _selectedPageIndex) return; // Si ya está en la pestaña, no hacer nada
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const TabsScreen()), // Regresa a TabsScreen
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

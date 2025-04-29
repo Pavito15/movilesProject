@@ -14,9 +14,9 @@ class CustomMenuProfile extends StatelessWidget {
     return Expanded(
       child: ListView.separated(
         itemCount: listItems.length,
-        separatorBuilder: (context, index) => Divider(
+        separatorBuilder: (context, index) => const Divider(
           thickness: 0.3,
-          color: const Color.fromARGB(255, 205, 205, 205),
+          color: Color.fromARGB(255, 205, 205, 205),
         ),
         itemBuilder: (context, index) {
           final item = listItems[index];
@@ -42,14 +42,17 @@ class CustomMenuProfile extends StatelessWidget {
                   size: 18,
                   color: const Color(0xFF7D848D),
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => item['destination'],
-                    ),
-                  );
-                },
+                onTap: item['onTap'] ??
+                    () {
+                      if (item['destination'] != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => item['destination'],
+                          ),
+                        );
+                      }
+                    }, // Navega solo si hay un destination válido
               ),
             ),
           );

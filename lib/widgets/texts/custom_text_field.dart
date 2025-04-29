@@ -28,7 +28,8 @@ class CustomTextField extends StatefulWidget {
     this.prefixIcon,
     this.fillColor = const Color.fromRGBO(247, 247, 249, 1.0),
     this.borderRadius = 14.0,
-    this.contentPadding = const EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0),
+    this.contentPadding =
+        const EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0),
     this.maxLines = 1,
     this.focusNode,
     this.hintText,
@@ -60,7 +61,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
         suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
-                  _obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  _obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                 ),
                 onPressed: () {
                   setState(() {

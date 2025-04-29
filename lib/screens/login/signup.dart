@@ -1,32 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:project_v1/screens/login/signup.dart';
-import 'package:project_v1/screens/login/recovery_password.dart';
 import 'package:project_v1/widgets/buttons/custom_icon_button.dart';
 import 'package:project_v1/widgets/buttons/custom_text_button.dart';
 import 'package:project_v1/widgets/buttons/primary_button.dart';
 import 'package:project_v1/widgets/texts/custom_text_field.dart';
 import 'package:project_v1/widgets/texts/customs_texts.dart';
 
-class Signin extends StatefulWidget {
-  const Signin({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
   @override
-  State<Signin> createState() => _SigninState();
+  State<Signup> createState() => _SignupState();
 }
 
-class _SigninState extends State<Signin> {
+class _SignupState extends State<Signup> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   String? _errorMessage;
 
-  // Sign in con email y contraseña
-  Future<void> _signIn() async {
+  // Función para registrar con email y contraseña
+  Future<void> _signUp() async {
+    if (_passwordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
+      setState(() {
+        _errorMessage = 'Las contraseñas no coinciden.';
+      });
+      return;
+    }
+
     try {
-      await _auth.signInWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
@@ -39,35 +47,36 @@ class _SigninState extends State<Signin> {
           _errorMessage = _getErrorMessage(e.code);
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Error inesperado: $e';
-        });
-      }
     }
   }
 
-  // Sign in con Google
-  Future<void> _signInWithGoogle() async {
+  // Función para registrarse con Google
+  Future<void> _signUpWithGoogle() async {
     try {
+      // Cierra la sesión anterior de Google para forzar el selector de cuentas
       await _googleSignIn.signOut();
+
+      // Inicia el flujo de autenticación de Google
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         setState(() {
-          _errorMessage = 'Inicio de sesión cancelado';
+          _errorMessage = 'Registro cancelado';
         });
         return;
       }
 
+      // Obtiene las credenciales de autenticación
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
+      // Crea una credencial para Firebase
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      // Intenta registrar/iniciar sesión con la credencial
       await _auth.signInWithCredential(credential);
 
       if (mounted) {
@@ -82,25 +91,24 @@ class _SigninState extends State<Signin> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Error al iniciar sesión con Google: $e';
+          _errorMessage = 'Error al registrar con Google: $e';
         });
       }
     }
   }
 
-  // Función para obtener mensajes de error personalizados
   String _getErrorMessage(String code) {
     switch (code) {
+      case 'email-already-in-use':
+        return 'El correo ya está registrado. Usa Sign In.';
       case 'invalid-email':
         return 'El correo electrónico no es válido.';
+      case 'weak-password':
+        return 'La contraseña es demasiado débil (mínimo 6 caracteres).';
       case 'account-exists-with-different-credential':
-        return 'La cuenta ya existe con un método de inicio diferente.';
-      case 'invalid-credential':
-        return 'Las credenciales no son válidas. Revisa tu correo o contraseña.';
-      case 'too-many-requests':
-        return 'Demasiados intentos fallidos. Intenta de nuevo más tarde.';
+        return 'La cuenta ya existe con un método de inicio diferente. Usa Sign In.';
       default:
-        return 'Ocurrió un error: $code. Inténtalo de nuevo.';
+        return 'Ocurrió un error. Inténtalo de nuevo.';
     }
   }
 
@@ -108,6 +116,7 @@ class _SigninState extends State<Signin> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -116,6 +125,7 @@ class _SigninState extends State<Signin> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
@@ -123,10 +133,10 @@ class _SigninState extends State<Signin> {
           physics: const BouncingScrollPhysics(),
           child: Column(
             children: [
-              const TitleText(text: "Sign in now"),
+              const TitleText(text: "Sign up now"),
               const SizedBox(height: 10),
               const SubtitleText(
-                text: "Please sign in to continue our app",
+                text: "Please fill the data and create account",
                 fontSize: 18.0,
               ),
               const SizedBox(height: 40.0),
@@ -137,23 +147,15 @@ class _SigninState extends State<Signin> {
               ),
               const SizedBox(height: 25.0),
               CustomTextField(
-                labelText: 'Password',
+                labelText: "Password",
                 controller: _passwordController,
                 isPassword: true,
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: CustomTextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RecoveryPassword(),
-                      ),
-                    );
-                  },
-                  text: "Forgot Password?",
-                ),
+              const SizedBox(height: 25.0),
+              CustomTextField(
+                labelText: "Confirm Password",
+                controller: _confirmPasswordController,
+                isPassword: true,
               ),
               if (_errorMessage != null)
                 Padding(
@@ -163,26 +165,21 @@ class _SigninState extends State<Signin> {
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
-              const SizedBox(height: 30.0),
+              const SizedBox(height: 50.0),
               PrimaryButton(
-                text: "Sign In",
-                onPressed: _signIn,
+                text: "Sign Up",
+                onPressed: _signUp,
               ),
               const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SubtitleText(text: "Don't have an account?"),
+                  const SubtitleText(text: "Already have an account?"),
                   CustomTextButton(
+                    text: "Sign In",
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Signup(),
-                        ),
-                      );
+                      Navigator.pop(context);
                     },
-                    text: "Sign Up",
                   ),
                 ],
               ),
@@ -197,7 +194,7 @@ class _SigninState extends State<Signin> {
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 25.0),
-                    child: SubtitleText(text: "Or login with"),
+                    child: SubtitleText(text: "Or sign up with"),
                   ),
                   const Expanded(
                     child: Divider(
@@ -213,11 +210,10 @@ class _SigninState extends State<Signin> {
                 children: [
                   CustomIconButton(
                     imagePath: "assets/images_icons/google_icon.png",
-                    onPressed: _signInWithGoogle,
+                    onPressed: _signUpWithGoogle,
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
             ],
           ),
         ),
