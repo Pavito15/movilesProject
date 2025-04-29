@@ -1,61 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/productos.dart';
+import '../provider/cardProvider.dart';
 import '../screens/Payment/pay.dart';
 
-class ShoppyCar extends StatefulWidget {
-  const ShoppyCar({super.key, required this.carrito});
-
-  final List<Producto> carrito;
-
-  @override
-  _ShoppyCarState createState() => _ShoppyCarState();
-}
-
-class _ShoppyCarState extends State<ShoppyCar> {
-  final List<Producto> productos = [
-    Producto(
-      id: 1,
-      nombre: 'Vitamina C hidra Glow Serum',
-      precio: 315.0,
-      imagen: 'assets/imagenes_productos/1.jpg',
-      descripcion: 'Serum de vitamina C 10% con ácido hialurónico.',
-    ),
-    Producto(
-      id: 2,
-      nombre: 'Niacinamida Serum',
-      precio: 280.0,
-      imagen: 'assets/imagenes_productos/2.jpg',
-      descripcion: 'Serum de niacinamida al 5% con centella asiática.',
-    ),
-    Producto(
-      id: 3,
-      nombre: 'Ácido hialurónico Hidra Serum',
-      precio: 280.0,
-      imagen: 'assets/imagenes_productos/3.jpg',
-      descripcion: 'Hidratación profunda con extracto de pepino.',
-    ),
-  ];
-
-  final Map<int, int> cantidades = {};
-
-  @override
-  void initState() {
-    super.initState();
-    for (var producto in productos) {
-      cantidades[producto.id] = 1;
-    }
-  }
-
-  double calcularTotal() {
-    double total = 0.0;
-    for (var producto in productos) {
-      total += producto.precio * cantidades[producto.id]!;
-    }
-    return total;
-  }
+class ShoppyCar extends StatelessWidget {
+  const ShoppyCar({super.key, required List<Producto> carrito});
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -67,7 +22,6 @@ class _ShoppyCarState extends State<ShoppyCar> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -79,90 +33,106 @@ class _ShoppyCarState extends State<ShoppyCar> {
             ),
             const SizedBox(height: 20),
 
+            // Lista de productos en el carrito
             Expanded(
-              child: ListView.builder(
-                itemCount: productos.length,
-                itemBuilder: (context, index) {
-                  final producto = productos[index];
-                  return Card(
-                    color: Colors.blue.shade900,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(
-                              producto.imagen,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
+              child: cartProvider.items.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'El carrito está vacío',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: cartProvider.items.length,
+                      itemBuilder: (context, index) {
+                        final cartItem = cartProvider.items[index];
+                        final producto = cartItem.producto;
+
+                        return Card(
+                          color: Colors.blue.shade900,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  producto.nombre,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                // Imagen del producto
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                    producto.imagen,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '\$${producto.precio.toInt()}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                const SizedBox(width: 12),
+
+                                // Información del producto
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        producto.nombre,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '\$${producto.precio.toInt()}',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                ),
+
+                                // Controles de cantidad
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.add_circle, color: Colors.white, size: 30),
+                                      onPressed: () {
+                                        cartProvider.addToCart(producto);
+                                      },
+                                    ),
+                                    Text(
+                                      cartItem.cantidad.toString(),
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.remove_circle, color: Colors.white, size: 30),
+                                      onPressed: () {
+                                        if (cartItem.cantidad > 1) {
+                                          cartProvider.items[index].cantidad--;
+                                          cartProvider.notifyListeners();
+                                        } else {
+                                          cartProvider.removeFromCart(producto);
+                                        }
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                          Column(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.add_circle, color: Colors.white, size: 30),
-                                onPressed: () {
-                                  setState(() {
-                                    cantidades[producto.id] = cantidades[producto.id]! + 1;
-                                  });
-                                },
-                              ),
-                              Text(
-                                cantidades[producto.id].toString(),
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.white, size: 30),
-                                onPressed: () {
-                                  setState(() {
-                                    productos.removeAt(index);
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
 
             // Total de compra
@@ -175,12 +145,14 @@ class _ShoppyCarState extends State<ShoppyCar> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Total:",
-                      style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("\$${calcularTotal().toStringAsFixed(2)}",
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Total:",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "\$${cartProvider.items.fold(0.0, (total, item) => total + (item.producto.precio * item.cantidad)).toStringAsFixed(2)}",
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ),
@@ -191,12 +163,19 @@ class _ShoppyCarState extends State<ShoppyCar> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PaymentScreen(totalCompra: calcularTotal()),
-                    ),
-                  );
+                  if (cartProvider.items.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PaymentScreen(
+                          totalCompra: cartProvider.items.fold(
+                            0,
+                            (total, item) => total + (item.producto.precio * item.cantidad),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue.shade900,

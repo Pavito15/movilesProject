@@ -10,24 +10,56 @@ class MenuDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
-          ListTile( 
-            leading: Image.asset('assets/iconoproducto.png', width: 30, height: 30),
-            title: const Text('Productos'),
-            onTap: () {
-              Navigator.pop(context); 
-              onTabSelected(2); 
-            },
+          // Encabezado del menú con solo el recuadro azul y texto
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue.shade800,
+            ),
+            child: Center(
+              child: const Text(
+                "CLEORGANIC",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.shopping_cart, size: 30),
-            title: const Text('Carrito'),
-            onTap: () {
-              Navigator.pop(context); 
-              onTabSelected(1); 
-            },
+
+          // Opciones del menú
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.person, size: 30, color: Colors.blue),
+                  title: const Text('Perfil'),
+                  onTap: () {
+                    Navigator.pop(context); // Cierra el menú
+                    Navigator.pushNamed(context, '/profile'); // Redirige a la pantalla de inicio de sesión
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.category, size: 30, color: Colors.blue),
+                  title: const Text('Productos'),
+                  onTap: () {
+                    Navigator.pop(context); // Cierra el menú
+                    onTabSelected(2); // Redirige a la sección de productos
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.shopping_cart, size: 30, color: Colors.blue),
+                  title: const Text('Carrito'),
+                  onTap: () {
+                    Navigator.pop(context); // Cierra el menú
+                    onTabSelected(1); // Redirige al carrito
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),
