@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:project_v1/screens/tabs.dart';
 import 'package:provider/provider.dart';
@@ -49,10 +50,21 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                 color: Colors.grey[200],
               ),
               clipBehavior: Clip.antiAlias,
-              child: Image.asset(
-                widget.producto.imagen,
-                fit: BoxFit.contain,
-              ),
+              child: widget.producto.imagen.startsWith('/')
+                  ? Image.file(
+                      File(widget.producto.imagen),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.broken_image, size: 60);
+                      },
+                    )
+                  : Image.network(
+                      widget.producto.imagen,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.broken_image, size: 60);
+                      },
+                    ),
             ),
             const SizedBox(height: 20),
 

@@ -1,5 +1,8 @@
-import 'package:flutter/material.dart'; 
+import 'dart:io'; // Importa para manejar archivos locales
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/productos.dart';
+import '../provider/cardProvider.dart';
 import '../screens/producto_details.dart';
 
 class ProductoItem extends StatelessWidget {
@@ -14,7 +17,7 @@ class ProductoItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetalleProductoScreen(producto: producto), 
+            builder: (context) => DetalleProductoScreen(producto: producto),
           ),
         );
       },
@@ -30,10 +33,23 @@ class ProductoItem extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                producto.imagen,
-                height: 150,
-                fit: BoxFit.cover,
+              // Mostrar la imagen del producto
+              Expanded(
+                child: producto.imagen.startsWith('/')
+                    ? Image.file(
+                        File(producto.imagen),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.broken_image, size: 60, color: Colors.white);
+                        },
+                      )
+                    : Image.network(
+                        producto.imagen,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.broken_image, size: 60, color: Colors.white);
+                        },
+                      ),
               ),
               const SizedBox(height: 10),
               Text(
@@ -53,22 +69,15 @@ class ProductoItem extends StatelessWidget {
               const SizedBox(height: 10),
               FloatingActionButton(
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Producto agregado'),
-                        content: const Text('Se agregó al carrito'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
+                  // Agregar el producto al carrito
+                  Provider.of<CartProvider>(context, listen: false).addToCart(producto);
+
+                  // Mostrar un mensaje de confirmación
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${producto.nombre} añadido al carrito'),
+                      duration: const Duration(seconds: 2),
+                    ),
                   );
                 },
                 mini: true,
@@ -84,29 +93,6 @@ class ProductoItem extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class ProductosList extends StatelessWidget {
-  const ProductosList({super.key, required this.productos});
-
-  final List<Producto> productos;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 350,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: productos.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: ProductoItem(producto: productos[index]),
-          );
-        },
       ),
     );
   }
