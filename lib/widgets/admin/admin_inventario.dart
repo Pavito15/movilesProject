@@ -11,20 +11,20 @@ class AdminInventario extends StatefulWidget {
 }
 
 class _AdminInventarioState extends State<AdminInventario> {
-  int _selectedIndex = 1; // Índice inicial para Inventario
+  int _selectedIndex = 1; 
 
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (int) {  },)), // Navega a Home
+        MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (int) {  },)), 
       );
     } else if (index == 1) {
       // Mantente en la pantalla actual
     } else if (index == 2) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AdminWidget()), // Navega al Admin Panel
+        MaterialPageRoute(builder: (context) => const AdminWidget()), 
       );
     }
   }

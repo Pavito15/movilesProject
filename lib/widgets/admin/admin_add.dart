@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:project_v1/widgets/admin/admin_widget.dart'; // Importa Admin Panel
-import 'package:project_v1/screens/home_screens.dart'; // Importa Home
+import 'package:project_v1/widgets/admin/admin_widget.dart';
+import 'package:project_v1/screens/home_screens.dart';
 
 class AdminAddProducto extends StatefulWidget {
   const AdminAddProducto({super.key});
@@ -24,6 +25,7 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
 
   final ImagePicker _picker = ImagePicker();
 
+  // Método para seleccionar una imagen y subirla a Firebase Storage
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -32,20 +34,26 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
       });
 
       try {
-        final directory = await getApplicationDocumentsDirectory();
-        final localPath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final localFile = await _imageFile!.copy(localPath);
+        // Sube la imagen a Firebase Storage
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('productos/${DateTime.now().millisecondsSinceEpoch}.jpg');
+        final uploadTask = storageRef.putFile(_imageFile!);
+        final snapshot = await uploadTask.whenComplete(() => null);
+
+        // Obtén la URL de descarga
+        final downloadUrl = await snapshot.ref.getDownloadURL();
 
         setState(() {
-          _imageUrl = localFile.path;
+          _imageUrl = downloadUrl; // Guarda la URL de descarga
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Imagen guardada localmente')),
+          const SnackBar(content: Text('Imagen subida exitosamente')),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar la imagen localmente: $e')),
+          SnackBar(content: Text('Error al subir la imagen: $e')),
         );
       }
     } else {
@@ -55,12 +63,13 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
     }
   }
 
+  // Método para guardar el producto en Firestore
   Future<void> _guardarProducto() async {
     if (_formKey.currentState!.validate() && _imageUrl != null) {
       final nuevoProducto = {
         'nombre': _nombreController.text,
         'precio': double.parse(_precioController.text),
-        'imagen': _imageUrl,
+        'imagen': _imageUrl, // Guarda la URL de descarga
         'descripcion': _descripcionController.text,
         'stock': int.parse(_stockController.text),
         'fechaCreacion': FieldValue.serverTimestamp(),
@@ -72,6 +81,7 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
           SnackBar(content: Text('Producto "${_nombreController.text}" agregado exitosamente')),
         );
 
+        // Limpiar los campos
         _nombreController.clear();
         _precioController.clear();
         _descripcionController.clear();
@@ -92,20 +102,19 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
     }
   }
 
-  int _selectedIndex = 1; // Índice inicial para AdminAddProducto
-
+  int _selectedIndex = 1;
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (int) {  },)), // Navega a Home
+        MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (int) {  },)),
       );
     } else if (index == 1) {
       // Mantente en la pantalla actual
     } else if (index == 2) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AdminWidget()), // Navega al Admin Panel
+        MaterialPageRoute(builder: (context) => const AdminWidget()),
       );
     }
   }
