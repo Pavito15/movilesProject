@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:project_v1/widgets/admin/admin_add.dart';
 import 'package:project_v1/widgets/admin/admin_inventario.dart';
 
-import '../../data/productos.dart'; 
 
 class AdminWidget extends StatelessWidget {
   const AdminWidget({super.key});
@@ -56,9 +55,7 @@ class AdminWidget extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AdminInventario(
-                        productos: dataProductos, // Pasa la lista de productos
-                      ),
+                      builder: (context) => AdminInventario(),
                     ),
                   );
                 },

@@ -6,7 +6,7 @@ import 'package:project_v1/provider/cardProvider.dart';
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/profile.dart';
 import 'package:project_v1/screens/tabs.dart';
-
+ 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -28,15 +28,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // theme: ThemeData.dark()
       title: 'CLEORGANIC',
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
         primarySwatch: Colors.blue,
       ),
-      home: const Signin(),
+      home: const TabsScreen(),
       routes: {
         '/profile': (context) => const Profile(),
-        '/main': (context) => const TabsScreen(),
+        '/signin': (context) => const Signin(), // Ruta para la pantalla de inicio de sesión
       },
     );
   }

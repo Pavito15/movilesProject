@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/productos.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/productos.dart';
 import 'producto_item.dart';
 import 'package:project_v1/widgets/menus/menu.dart';
 
@@ -83,9 +84,36 @@ class HomeWidget extends StatelessWidget {
                   const SizedBox(height: 40),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ProductosList(productos: dataProductos),
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance.collection('productos').snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return const Center(child: Text('No hay productos disponibles.'));
+                        }
+
+                        final productos = snapshot.data!.docs.map((doc) {
+                          return Producto.fromFirestore(doc);
+                        }).toList();
+
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: productos.length,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.7,
+                          ),
+                          itemBuilder: (context, index) {
+                            final producto = productos[index];
+                            return ProductoItem(producto: producto);
+                          },
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
