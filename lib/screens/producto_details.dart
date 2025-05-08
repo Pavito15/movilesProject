@@ -51,10 +51,16 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
         });
       });
 
+      // ✅ Verificación de que el widget sigue montado
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gracias por calificar el producto')),
       );
     } catch (e) {
+      // ✅ Verificación de que el widget sigue montado
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al calificar el producto: $e')),
       );
