@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         primarySwatch: Colors.blue,
       ),
-      home: const Signin(), // Pantalla inicial de inicio de sesión
+      home: const Signin(), // Pantalla inicial de inicio de sesión a
       routes: {
         '/profile': (context) => const Profile(), // Ruta a la pantalla de perfil
         '/main': (context) => const TabsScreen(), // Ruta a la pantalla HOME
