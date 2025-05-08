@@ -11,7 +11,6 @@ import 'package:project_v1/widgets/menus/custom_menu_profile.dart';
 import 'package:project_v1/widgets/texts/customs_texts.dart';
 import 'package:project_v1/widgets/admin/admin_widget.dart';
 
-
 class Profile extends StatefulWidget {
   const Profile({super.key});
 
@@ -101,7 +100,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               TitleText(
-                text: (user?.name == "") ? "Update Info!" : user!.name,
+                text: (user?.name == "") ? "No Name" : user!.name,
                 fontWeight: FontWeight.w500,
               ),
               SubtitleText(
