@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Importa Firebase Auth
 import 'package:project_v1/screens/login/signin.dart'; // Para redirigir a Signin
+import 'package:provider/provider.dart';
+import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/widgets/buttons/custom_text_button.dart';
 import 'package:project_v1/widgets/buttons/primary_button.dart';
 import 'package:project_v1/widgets/custom_image_avatar.dart';
@@ -16,13 +18,33 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  final TextEditingController _firstNameController =
-      TextEditingController(text: "Robert");
-  final TextEditingController _lastNameController =
-      TextEditingController(text: "Mancilla");
-  final TextEditingController _emailController =
-      TextEditingController(text: "luischavez@gmail.com");
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Actualizaremos los controladores después del primer render
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserData();
+    });
+  }
+
+  void _loadUserData() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.user;
+
+    if (user != null) {
+      setState(() {
+        _firstNameController.text = user.name;
+        _lastNameController.text = user.surname;
+        _emailController.text = user.email;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -67,7 +89,8 @@ class _EditProfileState extends State<EditProfile> {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const Signin()),
-            (Route<dynamic> route) => false, // Elimina todas las rutas anteriores
+            (Route<dynamic> route) =>
+                false, // Elimina todas las rutas anteriores
           );
         }
       } else {
@@ -94,6 +117,49 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
+  // Función para actualizar el perfil
+  Future<void> _updateProfile() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final currentUser = userProvider.user;
+
+      if (currentUser != null) {
+        // Crear un objeto UserModel actualizado con los nuevos datos
+        final updatedUser = currentUser.copyWith(
+          name: _firstNameController.text.trim(),
+          surname: _lastNameController.text.trim(),
+          // No actualizamos el email aquí porque requeriría reautenticación
+        );
+
+        // Actualizar los datos en Firestore
+        await userProvider.updateUser(updatedUser);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Perfil actualizado exitosamente')),
+          );
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al actualizar el perfil: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,13 +168,7 @@ class _EditProfileState extends State<EditProfile> {
         actionWidget: CustomTextButton(
           text: "Done",
           onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Data updated.'),
-                duration: Duration(seconds: 1),
-              ),
-            );
-            Navigator.pop(context);
+            _updateProfile();
           },
           textColor: const Color(0xFF0D47A1),
           fontWeight: FontWeight.w800,
@@ -124,9 +184,16 @@ class _EditProfileState extends State<EditProfile> {
               child: CustomImageAvatar(
                   imagePath: "assets/images_icons/avatar_men.png"),
             ),
-            const TitleText(
-              text: "Robert",
-              fontWeight: FontWeight.w500,
+            Consumer<UserProvider>(
+              builder: (context, userProvider, child) {
+                final user = userProvider.user;
+                return TitleText(
+                  text: (user?.name == null || user?.name == "")
+                      ? "Update Info"
+                      : user!.name,
+                  fontWeight: FontWeight.w500,
+                );
+              },
             ),
             CustomTextButton(
               text: "Change Profile Picture",
@@ -154,6 +221,9 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Widget _buildInputField(String label, TextEditingController controller) {
+    // Determinar si el campo debe ser de solo lectura basado en si es email
+    final bool readOnly = label == "Email";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -167,6 +237,7 @@ class _EditProfileState extends State<EditProfile> {
         CustomTextField(
           labelText: "",
           controller: controller,
+          readOnly: readOnly,
           onChanged: (value) => setState(() {}),
         ),
         const SizedBox(height: 20),

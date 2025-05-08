@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/screens/profile/edit_profile.dart';
 import 'package:project_v1/widgets/custom_image_avatar.dart';
 import 'package:project_v1/widgets/menus/custom_app_bar.dart';
@@ -13,12 +15,31 @@ class ProfileData extends StatefulWidget {
 }
 
 class _ProfileDataState extends State<ProfileData> {
-  final TextEditingController _firstNameController =
-      TextEditingController(text: "Robert");
-  final TextEditingController _lastNameController =
-      TextEditingController(text: "Mancilla");
-  final TextEditingController _emailController =
-      TextEditingController(text: "luischavez@gmail.com");
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Actualizaremos los controladores después del primer render
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateControllers();
+    });
+  }
+
+  void _updateControllers() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.user;
+
+    if (user != null) {
+      setState(() {
+        _firstNameController.text = user.name;
+        _lastNameController.text = user.surname;
+        _emailController.text = user.email;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -30,6 +51,9 @@ class _ProfileDataState extends State<ProfileData> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
+
     return Scaffold(
       appBar: CustomAppBar(
         title: "Profile Info",
@@ -50,11 +74,13 @@ class _ProfileDataState extends State<ProfileData> {
                 ),
               ),
               TitleText(
-                text: "Robert",
+                text: (user?.name == null || user?.name == "")
+                    ? "Update Info"
+                    : user!.name,
                 fontWeight: FontWeight.w500,
               ),
               SubtitleText(
-                text: "luischavez@gmail.com",
+                text: user?.email ?? "correo@ejemplo.com",
                 fontSize: 20,
               ),
               const SizedBox(height: 40.0),

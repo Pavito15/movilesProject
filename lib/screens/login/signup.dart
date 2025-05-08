@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
+import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/widgets/buttons/custom_icon_button.dart';
 import 'package:project_v1/widgets/buttons/custom_text_button.dart';
 import 'package:project_v1/widgets/buttons/primary_button.dart';
@@ -23,6 +27,33 @@ class _SignupState extends State<Signup> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   String? _errorMessage;
 
+  //future para registrar usuario en firestore database
+
+  Future<void> saveUserToFirestore(User user,
+      {String provider = 'email'}) async {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    final token = await FirebaseMessaging.instance.getToken();
+
+    await users.doc(user.uid).set({
+      'email': user.email ?? '',
+      'isActive': true,
+      'name': user.displayName?.split(' ').first ?? '',
+      'surname': user.displayName?.split(' ').skip(1).join(' ') ?? '',
+      'phone': user.phoneNumber ?? '',
+      'pictureProfile': user.photoURL ?? '',
+      'provider': provider,
+      'role': 'user',
+      'tokenDevice': token,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> _loadUserData(User user) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.getUserData(user.uid);
+  }
+
   // Función para registrar con email y contraseña
   Future<void> _signUp() async {
     if (_passwordController.text.trim() !=
@@ -34,12 +65,22 @@ class _SignupState extends State<Signup> {
     }
 
     try {
-      await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/main');
+
+      User? user = userCredential.user;
+      if (user != null) {
+        // Guardar los datos en Firestore
+        await saveUserToFirestore(user);
+        // Llamar a la función para cargar los datos del usuario
+        await _loadUserData(user);
+        // Navegar a la pantalla principal
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/main');
+        }
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -77,7 +118,14 @@ class _SignupState extends State<Signup> {
       );
 
       // Intenta registrar/iniciar sesión con la credencial
-      await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (userCredential.additionalUserInfo?.isNewUser == true &&
+          user != null) {
+        await saveUserToFirestore(user, provider: 'google');
+      }
 
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/main');

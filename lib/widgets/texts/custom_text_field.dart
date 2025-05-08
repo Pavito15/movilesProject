@@ -26,7 +26,7 @@ class CustomTextField extends StatefulWidget {
     this.validator,
     this.onChanged,
     this.prefixIcon,
-    this.fillColor = const Color.fromRGBO(247, 247, 249, 1.0),
+    this.fillColor = const Color.fromARGB(255, 237, 237, 238),
     this.borderRadius = 14.0,
     this.contentPadding =
         const EdgeInsets.symmetric(vertical: 20.0, horizontal: 12.0),
