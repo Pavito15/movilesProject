@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_v1/widgets/admin/admin_widget.dart'; // Importa Admin Panel
 import 'package:project_v1/screens/home_screens.dart'; // Importa Home
+import 'package:project_v1/screens/tabs.dart'; // Ensure TabsScreen is imported
 
 class AdminInventario extends StatefulWidget {
   const AdminInventario({super.key});
@@ -12,22 +13,23 @@ class AdminInventario extends StatefulWidget {
 
 class _AdminInventarioState extends State<AdminInventario> {
   int _selectedIndex = 1;
-
   void _onItemTapped(int index) {
     if (index == 0) {
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (int) {})),
+        MaterialPageRoute(builder: (context) => const TabsScreen(initialIndex: 0)),
       );
     } else if (index == 1) {
       // Mantente en la pantalla actual
     } else if (index == 2) {
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const AdminWidget()),
       );
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -127,13 +129,21 @@ class _AdminInventarioState extends State<AdminInventario> {
                                       'descripcion': descripcionController.text,
                                       'stock': int.parse(stockController.text),
                                     });
-                                    Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Producto actualizado exitosamente')),
-                                    );
+
+                                    // Verificar si el widget sigue montado
+                                    if (!mounted) return;
+
+                                    // Navegar hacia atrás si el contexto sigue montado
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Producto actualizado exitosamente')),
+                                      );
+                                    }
                                   },
                                   child: const Text('Guardar'),
                                 ),
+
                               ],
                             );
                           },
@@ -166,9 +176,15 @@ class _AdminInventarioState extends State<AdminInventario> {
 
                         if (confirm == true) {
                           await FirebaseFirestore.instance.collection('productos').doc(id).delete();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Producto eliminado exitosamente')),
-                          );
+                          
+                          // Verificar si el widget sigue montado
+                          if (!mounted) return;
+                          
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Producto eliminado exitosamente')),
+                            );
+                          }
                         }
                       },
                     ),
