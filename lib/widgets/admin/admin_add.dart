@@ -1,5 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:project_v1/models/productos.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_v1/widgets/admin/admin_widget.dart';
+import 'package:project_v1/screens/home_screens.dart';
+import 'package:project_v1/screens/tabs.dart'; // Ensure TabsScreen is imported
 
 class AdminAddProducto extends StatefulWidget {
   const AdminAddProducto({super.key});
@@ -12,41 +18,121 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _precioController = TextEditingController();
-  final TextEditingController _imagenController = TextEditingController();
   final TextEditingController _descripcionController = TextEditingController();
   final TextEditingController _stockController = TextEditingController();
+  String? _imageUrl;
+  File? _imageFile;
 
-  void _guardarProducto() {
-    if (_formKey.currentState!.validate()) {
-      final nuevoProducto = Producto(
-        id: DateTime.now().millisecondsSinceEpoch,
-        nombre: _nombreController.text,
-        precio: double.parse(_precioController.text),
-        imagen: _imagenController.text,
-        descripcion: _descripcionController.text,
-        stock: int.parse(_stockController.text), // Asegúrate de que el modelo Producto tenga este campo
-      );
+  final ImagePicker _picker = ImagePicker();
 
-      // Aquí puedes manejar el nuevo producto, como enviarlo a una base de datos o lista
+  // Método para seleccionar una imagen y subirla a Firebase Storage
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+
+      try {
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('productos/${DateTime.now().millisecondsSinceEpoch}.jpg');
+        final uploadTask = storageRef.putFile(_imageFile!);
+        final snapshot = await uploadTask.whenComplete(() => null);
+
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+
+        if (!mounted) return; // 👈 Verificamos si sigue montado
+        setState(() {
+          _imageUrl = downloadUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Imagen subida exitosamente')),
+        );
+      } catch (e) {
+        if (!mounted) return; // 👈 Verificamos si sigue montado
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al subir la imagen: $e')),
+        );
+      }
+    } else {
+      if (!mounted) return; // 👈 Verificamos si sigue montado
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Producto "${nuevoProducto.nombre}" agregado exitosamente')),
+        const SnackBar(content: Text('No se seleccionó ninguna imagen')),
       );
-
-      // Limpiar los campos
-      _nombreController.clear();
-      _precioController.clear();
-      _imagenController.clear();
-      _descripcionController.clear();
-      _stockController.clear();
     }
   }
+
+
+  // Método para guardar el producto en Firestore
+  Future<void> _guardarProducto() async {
+    if (_formKey.currentState!.validate() && _imageUrl != null) {
+      final nuevoProducto = {
+        'nombre': _nombreController.text,
+        'precio': double.parse(_precioController.text),
+        'imagen': _imageUrl,
+        'descripcion': _descripcionController.text,
+        'stock': int.parse(_stockController.text),
+        'fechaCreacion': FieldValue.serverTimestamp(),
+      };
+
+      try {
+        await FirebaseFirestore.instance.collection('productos').add(nuevoProducto);
+        
+        if (!mounted) return; // 👈 Verificamos si sigue montado
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Producto "${_nombreController.text}" agregado exitosamente')),
+        );
+
+        _nombreController.clear();
+        _precioController.clear();
+        _descripcionController.clear();
+        _stockController.clear();
+        setState(() {
+          _imageFile = null;
+          _imageUrl = null;
+        });
+      } catch (e) {
+        if (!mounted) return; // 👈 Verificamos si sigue montado
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar el producto: $e')),
+        );
+      }
+    } else {
+      if (!mounted) return; // 👈 Verificamos si sigue montado
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor selecciona una imagen')),
+      );
+    }
+  }
+
+
+  int _selectedIndex = 1;
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const TabsScreen(initialIndex: 0)),
+      );
+    } else if (index == 1) {
+      // Mantente en la pantalla actual
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AdminWidget()),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: const Text('Agregar Producto', style: TextStyle(color: Colors.black)),
-      backgroundColor: Colors.white,
+        title: const Text('Agregar Producto', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
@@ -87,25 +173,13 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      controller: _imagenController,
-                      decoration: const InputDecoration(labelText: 'URL de la Imagen'),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor ingresa la URL de la imagen';
-                        }
-                        return null;
-                      },
-                    ),
+                    child: _imageFile == null
+                        ? const Text('No se ha seleccionado ninguna imagen')
+                        : Image.file(_imageFile!, height: 100),
                   ),
                   IconButton(
                     icon: const Icon(Icons.image),
-                    onPressed: () {
-                      // cargar una imagen desde la galería
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Cargar imagen desde la galería')),
-                      );
-                    },
+                    onPressed: _pickImage,
                   ),
                 ],
               ),
@@ -150,6 +224,16 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Agregar Producto'),
+          BottomNavigationBarItem(icon: Icon(Icons.admin_panel_settings), label: 'Admin Panel'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
       ),
     );
   }

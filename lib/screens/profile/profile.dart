@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/edit_profile.dart';
 import 'package:project_v1/screens/profile/profile_data.dart';
@@ -44,7 +46,22 @@ class _ProfileState extends State<Profile> {
     },
   ];
 
-  // llog out function
+  Future<void> _loadUserData() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = FirebaseAuth.instance.currentUser;
+
+    // Solo hacer la consulta a Firestore si los datos del usuario no están ya en el provider
+    if (user != null && userProvider.user == null) {
+      await userProvider.getUserData(user.uid);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
     if (mounted) {
@@ -58,6 +75,9 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final user = userProvider.user;
+
     return Scaffold(
       appBar: CustomAppBar(
         title: "Profile",
@@ -73,18 +93,18 @@ class _ProfileState extends State<Profile> {
         child: Center(
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 20.0, bottom: 10.0),
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                 child: CustomImageAvatar(
                   imagePath: "assets/images_icons/avatar_men.png",
                 ),
               ),
-              const TitleText(
-                text: "Robert",
+              TitleText(
+                text: (user?.name == "") ? "No Name" : user!.name,
                 fontWeight: FontWeight.w500,
               ),
-              const SubtitleText(
-                text: "luischavez@gmail.com",
+              SubtitleText(
+                text: user?.email ?? "correo@ejemplo.com",
                 fontSize: 20,
               ),
               const SizedBox(height: 20.0),
@@ -96,8 +116,7 @@ class _ProfileState extends State<Profile> {
                       'title': item['title'],
                       'leading': item['leading'],
                       'trailing': item['trailing'],
-                      'onTap': () =>
-                          _signOut(), // Llamamos a la función de cerrar sesión
+                      'onTap': () => _signOut(),
                     };
                   }
                   return {

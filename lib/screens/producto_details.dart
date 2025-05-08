@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:project_v1/screens/tabs.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/productos.dart';
 import '../provider/cardProvider.dart';
+import 'package:custom_rating_bar/custom_rating_bar.dart';
 
 class DetalleProductoScreen extends StatefulWidget {
   const DetalleProductoScreen({super.key, required this.producto});
@@ -15,6 +18,7 @@ class DetalleProductoScreen extends StatefulWidget {
 
 class DetalleProductoScreenState extends State<DetalleProductoScreen> {
   int cantidad = 1;
+  double userRating = 0.0; // Calificación del usuario
   final int _selectedPageIndex = 2; // Indica que estamos en la pestaña de "Productos"
 
   void _selectPage(int index) {
@@ -24,6 +28,43 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
       context,
       MaterialPageRoute(builder: (context) => const TabsScreen()), // Regresa a TabsScreen
     );
+  }
+
+  Future<void> _submitRating() async {
+    final productoRef = FirebaseFirestore.instance.collection('productos').doc(widget.producto.id);
+
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final snapshot = await transaction.get(productoRef);
+        if (!snapshot.exists) return;
+
+        final data = snapshot.data()!;
+        final currentRating = data['rating'] ?? 0.0;
+        final currentRatingCount = data['ratingCount'] ?? 0;
+
+        final newRating = ((currentRating * currentRatingCount) + userRating) / (currentRatingCount + 1);
+        final newRatingCount = currentRatingCount + 1;
+
+        transaction.update(productoRef, {
+          'rating': newRating,
+          'ratingCount': newRatingCount,
+        });
+      });
+
+      // ✅ Verificación de que el widget sigue montado
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gracias por calificar el producto')),
+      );
+    } catch (e) {
+      // ✅ Verificación de que el widget sigue montado
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al calificar el producto: $e')),
+      );
+    }
   }
 
   @override
@@ -49,10 +90,21 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                 color: Colors.grey[200],
               ),
               clipBehavior: Clip.antiAlias,
-              child: Image.asset(
-                widget.producto.imagen,
-                fit: BoxFit.contain,
-              ),
+              child: widget.producto.imagen.startsWith('/')
+                  ? Image.file(
+                      File(widget.producto.imagen),
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.broken_image, size: 60);
+                      },
+                    )
+                  : Image.network(
+                      widget.producto.imagen,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.broken_image, size: 60);
+                      },
+                    ),
             ),
             const SizedBox(height: 20),
 
@@ -226,6 +278,53 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
               style: const TextStyle(fontSize: 16, color: Colors.black54),
             ),
             const SizedBox(height: 20),
+
+            // Rating promedio
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Calificación promedio',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 8),
+            RatingBar.readOnly(
+              filledIcon: Icons.star,
+              emptyIcon: Icons.star_border,
+              initialRating: widget.producto.rating,
+              maxRating: 5,
+              filledColor: Colors.orange,
+              size: 30,
+            ),
+            const SizedBox(height: 20),
+
+            // Calificación del usuario
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Califica este producto',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 8),
+            RatingBar(
+              filledIcon: Icons.star,
+              emptyIcon: Icons.star_border,
+              onRatingChanged: (rating) {
+                setState(() {
+                  userRating = rating;
+                });
+              },
+              initialRating: 0,
+              maxRating: 5,
+              filledColor: Colors.orange,
+              size: 30,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _submitRating,
+              child: const Text('Enviar Calificación'),
+            ),
           ],
         ),
       ),

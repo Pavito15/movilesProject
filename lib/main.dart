@@ -1,17 +1,27 @@
 import 'package:project_v1/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:project_v1/provider/cardProvider.dart';
+import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/profile.dart';
 import 'package:project_v1/screens/tabs.dart';
-
+ 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()), // CART provider
+        ChangeNotifierProvider(create: (_) => UserProvider()),  // User Provider
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -20,16 +30,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // theme: ThemeData.dark()
       title: 'CLEORGANIC',
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
         primarySwatch: Colors.blue,
       ),
-      // AuthGate to home
-      home: const Signin(),
+      home: const Signin(), // Pantalla inicial de inicio de sesión
       routes: {
-        '/profile': (context) => const Profile(),
-        '/main': (context) => const TabsScreen(),
+        '/profile': (context) => const Profile(), // Ruta a la pantalla de perfil
+        '/main': (context) => const TabsScreen(), // Ruta a la pantalla HOME
       },
     );
   }

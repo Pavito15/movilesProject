@@ -5,7 +5,7 @@ class MenuDrawer extends StatelessWidget {
   final List<Producto> carrito;
   final void Function(int index) onTabSelected;
 
-  const MenuDrawer({super.key, required this.carrito, required this.onTabSelected});
+  const MenuDrawer({required this.carrito, required this.onTabSelected, super.key});
 
   @override
   Widget build(BuildContext context) {

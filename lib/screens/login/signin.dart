@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/screens/login/signup.dart';
 import 'package:project_v1/screens/login/recovery_password.dart';
 import 'package:project_v1/widgets/buttons/custom_icon_button.dart';
@@ -23,15 +26,49 @@ class _SigninState extends State<Signin> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   String? _errorMessage;
 
+//future para registrar usuario en firestore database
+  Future<void> saveUserToFirestore(User user,
+      {String provider = 'email'}) async {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    await users.doc(user.uid).set({
+      'email': user.email ?? '',
+      'isActive': true,
+      'name': user.displayName?.split(' ').first ?? '',
+      'surname': user.displayName?.split(' ').skip(1).join(' ') ?? '',
+      'phone': user.phoneNumber ?? '',
+      'pictureProfile': user.photoURL ?? '',
+      'provider': provider,
+      'role': 'user',
+      'tokenDevice': '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> _loadUserData(User user) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.getUserData(user.uid);
+  }
+
   // Sign in con email y contraseña
   Future<void> _signIn() async {
     try {
-      await _auth.signInWithEmailAndPassword(
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/main');
+      final user = userCredential.user;
+
+      if (user != null) {
+        // Obtener el provider antes de cualquier operación asíncrona
+        if (!mounted) return;
+
+        // Cargamos datos
+        await _loadUserData(user);
+
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/main');
+        }
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -68,10 +105,23 @@ class _SigninState extends State<Signin> {
         idToken: googleAuth.idToken,
       );
 
-      await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+      final user = userCredential.user;
 
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/main');
+      if (user != null) {
+        // Obtener el provider antes de cualquier operación asíncrona
+        if (!mounted) return;
+
+        if (userCredential.additionalUserInfo?.isNewUser == true) {
+          await saveUserToFirestore(user, provider: 'google');
+        }
+
+        // Usar la función _loadUserData en lugar de llamar directamente a getUserData
+        await _loadUserData(user);
+
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/main');
+        }
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
