@@ -1,152 +1,138 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../data/productos.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
 import '../models/productos.dart';
 import '../provider/cardProvider.dart';
+import 'package:provider/provider.dart';
 import 'producto_details.dart';
 
 class ProductosScreen extends StatelessWidget {
-  const ProductosScreen({super.key, required Null Function(dynamic producto) onProductSelected});
+  const ProductosScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GridView.builder(
-          itemCount: dataProductos.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.6,
-          ),
-          itemBuilder: (context, index) {
-            final Producto producto = dataProductos[index];
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('productos').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No hay productos disponibles.'));
+          }
 
-            return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: Colors.blueAccent, width: 1),
-              ),
-              color: Colors.white,
-              elevation: 3,
-              child: InkWell(
+          final productos = snapshot.data!.docs.map((doc) {
+            return Producto.fromFirestore(doc);
+          }).toList();
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(12.0),
+            itemCount: productos.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.7,
+            ),
+            itemBuilder: (context, index) {
+              final producto = productos[index];
+              return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          DetalleProductoScreen(producto: producto),
+                      builder: (context) => DetalleProductoScreen(producto: producto),
                     ),
                   );
                 },
-                borderRadius: BorderRadius.circular(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Imagen del producto
-                    Expanded(
-                      flex: 5,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Container(
-                            color: Colors.white,
-                            child: Image.asset(
-                              producto.imagen,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.broken_image,
-                                    size: 60, color: Colors.grey);
-                              },
-                            ),
-                          ),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.blueAccent, width: 1),
+                  ),
+                  elevation: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                          child: producto.imagen.isNotEmpty
+                              ? (producto.imagen.startsWith('/')
+                                  ? Image.file(
+                                      File(producto.imagen),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Icon(Icons.broken_image, size: 60);
+                                      },
+                                    )
+                                  : Image.network(
+                                      producto.imagen,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Icon(Icons.broken_image, size: 60);
+                                      },
+                                    ))
+                              : const Icon(Icons.image_not_supported, size: 60),
                         ),
                       ),
-                    ),
-                    // Información del producto
-                    Expanded(
-                      flex: 4,
-                      child: Padding(
+                      Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            // Nombre del producto
                             Text(
                               producto.nombre,
                               textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
-                            // Precio del producto
+                            const SizedBox(height: 4),
                             Text(
                               '\$${producto.precio.toStringAsFixed(2)}',
                               style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black87,
+                                fontSize: 14,
+                                color: Color.fromARGB(255, 0, 0, 0),
                               ),
                             ),
-                            // Botón "Añadir al carrito"
-                            FractionallySizedBox(
-                              widthFactor: 0.8,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Provider.of<CartProvider>(context,
-                                          listen: false)
-                                      .addToCart(producto); // Añade al carrito
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          '${producto.nombre} añadido al carrito'),
-                                      duration: const Duration(seconds: 2),
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue.shade800,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                            const SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                Provider.of<CartProvider>(context, listen: false)
+                                    .addToCart(producto);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('${producto.nombre} añadido al carrito'),
                                   ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Añadir',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue.shade900,
+                                foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
+                              child: const Text('Agregar al carrito'),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }

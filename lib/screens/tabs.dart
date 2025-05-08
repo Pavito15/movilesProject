@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:project_v1/screens/home_screens.dart';
 import 'package:project_v1/screens/shoppyCar.dart';
 import 'package:project_v1/screens/productos.dart';
-import 'package:project_v1/models/productos.dart';
 import 'package:project_v1/widgets/menus/menu.dart';
+import 'package:provider/provider.dart';
+import '../provider/cardProvider.dart';
 
 class TabsScreen extends StatefulWidget {
   final int initialIndex;
@@ -15,7 +16,6 @@ class TabsScreen extends StatefulWidget {
 
 class _TabsScreenState extends State<TabsScreen> {
   late int _selectedPageIndex;
-  final List<Producto> carrito = [];
 
   @override
   void initState() {
@@ -33,12 +33,17 @@ class _TabsScreenState extends State<TabsScreen> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       HomeScreen(onTabSelected: _selectPage),
-      ShoppyCar(carrito: carrito),
-      ProductosScreen(onProductSelected: (producto) {}),
+      const ShoppyCar(), // El carrito ahora se maneja con Provider
+      const ProductosScreen(), // Productos obtenidos desde Firestore
     ];
 
+    final cartProvider = Provider.of<CartProvider>(context);
+
     return Scaffold(
-      drawer: MenuDrawer(carrito: carrito, onTabSelected: _selectPage),
+      drawer: MenuDrawer(
+        carrito: cartProvider.items.map((item) => item.producto).toList(),
+        onTabSelected: _selectPage,
+      ),
       body: IndexedStack(
         index: _selectedPageIndex,
         children: pages,
@@ -57,4 +62,3 @@ class _TabsScreenState extends State<TabsScreen> {
     );
   }
 }
-

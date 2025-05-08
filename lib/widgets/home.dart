@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/productos.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/productos.dart';
 import 'producto_item.dart';
 import 'package:project_v1/widgets/menus/menu.dart';
 
@@ -12,7 +13,7 @@ class HomeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: MenuDrawer(carrito: [], onTabSelected: onTabSelected),
-      body: Column(
+      body: ListView(
         children: [
           Container(
             color: Colors.blue[800],
@@ -50,49 +51,67 @@ class HomeWidget extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Image.asset('assets/imagenes_home/home1.jpg'),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      '¡Los ingredientes que tu piel necesita!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      onTabSelected(2);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300],
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                    ),
-                    child: const Text(
-                      'Ver productos',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ProductosList(productos: dataProductos),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Image.asset('assets/imagenes_home/home1.jpg'),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              '¡Los ingredientes que tu piel necesita!',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
+          ElevatedButton(
+            onPressed: () {
+              onTabSelected(2);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[300],
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+            ),
+            child: const Text(
+              'Ver productos',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('productos').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No hay productos disponibles.'));
+                }
+
+                final productos = snapshot.data!.docs.map((doc) {
+                  return Producto.fromFirestore(doc);
+                }).toList();
+
+                return GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(), // Esto evita conflicto de scroll con el ListView
+                  shrinkWrap: true,
+                  itemCount: productos.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.5,
+                  ),
+                  itemBuilder: (context, index) {
+                    final producto = productos[index];
+                    return ProductoItem(producto: producto);
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
