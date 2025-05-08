@@ -45,6 +45,7 @@ class _SignupState extends State<Signup> {
       'provider': provider,
       'role': 'user',
       'tokenDevice': token,
+      'address': '',
       'createdAt': FieldValue.serverTimestamp(),
     });
   }

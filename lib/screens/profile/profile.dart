@@ -100,7 +100,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               TitleText(
-                text: (user?.name == "") ? "Update Info!" : user!.name,
+                text: (user?.name == "") ? "No Name" : user!.name,
                 fontWeight: FontWeight.w500,
               ),
               SubtitleText(

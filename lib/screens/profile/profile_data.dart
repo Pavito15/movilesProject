@@ -18,6 +18,8 @@ class _ProfileDataState extends State<ProfileData> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   @override
   void initState() {
@@ -37,6 +39,8 @@ class _ProfileDataState extends State<ProfileData> {
         _firstNameController.text = user.name;
         _lastNameController.text = user.surname;
         _emailController.text = user.email;
+        _addressController.text = user.address;
+        _phoneController.text = user.phone;
       });
     }
   }
@@ -46,6 +50,8 @@ class _ProfileDataState extends State<ProfileData> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -57,9 +63,15 @@ class _ProfileDataState extends State<ProfileData> {
     return Scaffold(
       appBar: CustomAppBar(
         title: "Profile Info",
-        onEdit: () {
-          Navigator.push(context,
+        onEdit: () async {
+          // Espera el resultado de la navegación y actualiza los controladores si es necesario
+          final result = await Navigator.push(context,
               MaterialPageRoute(builder: (context) => const EditProfile()));
+
+          // Si retornamos true, actualizamos los controladores
+          if (result == true) {
+            _updateControllers();
+          }
         },
       ),
       body: SingleChildScrollView(
@@ -75,7 +87,7 @@ class _ProfileDataState extends State<ProfileData> {
               ),
               TitleText(
                 text: (user?.name == null || user?.name == "")
-                    ? "Update Info"
+                    ? "No Name"
                     : user!.name,
                 fontWeight: FontWeight.w500,
               ),
@@ -94,10 +106,27 @@ class _ProfileDataState extends State<ProfileData> {
                 ),
               ),
               const SizedBox(height: 10),
-              CustomTextField(
-                  labelText: "",
-                  controller: _firstNameController,
-                  readOnly: true),
+              _firstNameController.text.isEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 237, 237, 238),
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 12.0),
+                      width: double.infinity,
+                      child: const Text(
+                        "No name",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : CustomTextField(
+                      labelText: "",
+                      controller: _firstNameController,
+                      readOnly: true,
+                    ),
               const SizedBox(height: 20),
               Align(
                 alignment: Alignment.centerLeft,
@@ -109,11 +138,91 @@ class _ProfileDataState extends State<ProfileData> {
                 ),
               ),
               const SizedBox(height: 10),
-              CustomTextField(
-                labelText: "",
-                controller: _lastNameController,
-                readOnly: true,
+              _lastNameController.text.isEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 237, 237, 238),
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 12.0),
+                      width: double.infinity,
+                      child: const Text(
+                        "No last name",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : CustomTextField(
+                      labelText: "",
+                      controller: _lastNameController,
+                      readOnly: true,
+                    ),
+              const SizedBox(height: 20),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SubtitleText(
+                  text: "Address",
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
               ),
+              const SizedBox(height: 10),
+              _addressController.text.isEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 237, 237, 238),
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 12.0),
+                      width: double.infinity,
+                      child: const Text(
+                        "No address",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : CustomTextField(
+                      labelText: "",
+                      controller: _addressController,
+                      readOnly: true,
+                    ),
+              const SizedBox(height: 20),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: SubtitleText(
+                  text: "Phone",
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _phoneController.text.isEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 237, 237, 238),
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 12.0),
+                      width: double.infinity,
+                      child: const Text(
+                        "No phone",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : CustomTextField(
+                      labelText: "",
+                      controller: _phoneController,
+                      readOnly: true,
+                    ),
               const SizedBox(height: 20),
               Align(
                 alignment: Alignment.centerLeft,
@@ -125,11 +234,28 @@ class _ProfileDataState extends State<ProfileData> {
                 ),
               ),
               const SizedBox(height: 10),
-              CustomTextField(
-                labelText: "",
-                controller: _emailController,
-                readOnly: true,
-              ),
+              _emailController.text.isEmpty
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 237, 237, 238),
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20.0, horizontal: 12.0),
+                      width: double.infinity,
+                      child: const Text(
+                        "No email",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : CustomTextField(
+                      labelText: "",
+                      controller: _emailController,
+                      readOnly: true,
+                    ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

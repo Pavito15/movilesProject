@@ -17,7 +17,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()), // CART provider
-        ChangeNotifierProvider(create: (_) => UserProvider()),  // User Provider
+        ChangeNotifierProvider(create: (_) => UserProvider()), // User Provider
       ],
       child: const MyApp(),
     ),
@@ -30,15 +30,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // theme: ThemeData.dark()
       title: 'CLEORGANIC',
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.white,
         primarySwatch: Colors.blue,
       ),
-      home: const Signin(), // Pantalla inicial de inicio de sesión
+      home: const Signin(),
       routes: {
-        '/profile': (context) => const Profile(), // Ruta a la pantalla de perfil
-        '/main': (context) => const TabsScreen(), // Ruta a la pantalla HOME
+        '/profile': (context) => const Profile(),
+        '/main': (context) => const TabsScreen(),
       },
     );
   }

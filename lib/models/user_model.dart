@@ -12,6 +12,7 @@ class UserModel {
   final bool isActive;
   final String tokenDevice;
   final DateTime createdAt;
+  final String address;
 
   UserModel({
     required this.uid,
@@ -25,6 +26,7 @@ class UserModel {
     required this.isActive,
     required this.tokenDevice,
     required this.createdAt,
+    required this.address,
   });
 
   factory UserModel.fromFirestore(Map<String, dynamic> data, String uid) {
@@ -40,6 +42,7 @@ class UserModel {
       isActive: data['isActive'] ?? true,
       tokenDevice: data['tokenDevice'] ?? '',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
+      address: data['address'] ?? '',
     );
   }
 
@@ -55,6 +58,7 @@ class UserModel {
       'isActive': isActive,
       'tokenDevice': tokenDevice,
       'createdAt': Timestamp.fromDate(createdAt),
+      'address': address,
     };
   }
 
@@ -69,6 +73,7 @@ class UserModel {
     bool? isActive,
     String? tokenDevice,
     DateTime? createdAt,
+    String? address,
   }) {
     return UserModel(
       uid: uid,
@@ -82,6 +87,7 @@ class UserModel {
       isActive: isActive ?? this.isActive,
       tokenDevice: tokenDevice ?? this.tokenDevice,
       createdAt: createdAt ?? this.createdAt,
+      address: address ?? this.address,
     );
   }
 }

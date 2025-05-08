@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Importa Firebase Auth
-import 'package:project_v1/screens/login/signin.dart'; // Para redirigir a Signin
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:project_v1/screens/login/signin.dart';
 import 'package:provider/provider.dart';
 import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/widgets/buttons/custom_text_button.dart';
@@ -21,8 +21,9 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  bool _isLoading = false;
 
   @override
   void initState() {
@@ -42,6 +43,8 @@ class _EditProfileState extends State<EditProfile> {
         _firstNameController.text = user.name;
         _lastNameController.text = user.surname;
         _emailController.text = user.email;
+        _addressController.text = user.address;
+        _phoneController.text = user.phone;
       });
     }
   }
@@ -51,6 +54,8 @@ class _EditProfileState extends State<EditProfile> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -119,10 +124,6 @@ class _EditProfileState extends State<EditProfile> {
 
   // Función para actualizar el perfil
   Future<void> _updateProfile() async {
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final currentUser = userProvider.user;
@@ -132,7 +133,8 @@ class _EditProfileState extends State<EditProfile> {
         final updatedUser = currentUser.copyWith(
           name: _firstNameController.text.trim(),
           surname: _lastNameController.text.trim(),
-          // No actualizamos el email aquí porque requeriría reautenticación
+          address: _addressController.text.trim(),
+          phone: _phoneController.text.trim(),
         );
 
         // Actualizar los datos en Firestore
@@ -142,7 +144,8 @@ class _EditProfileState extends State<EditProfile> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Perfil actualizado exitosamente')),
           );
-          Navigator.pop(context);
+          // Devolvemos true para indicar que se actualizó el perfil
+          Navigator.pop(context, true);
         }
       }
     } catch (e) {
@@ -150,12 +153,6 @@ class _EditProfileState extends State<EditProfile> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al actualizar el perfil: $e')),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
   }
@@ -189,7 +186,7 @@ class _EditProfileState extends State<EditProfile> {
                 final user = userProvider.user;
                 return TitleText(
                   text: (user?.name == null || user?.name == "")
-                      ? "Update Info"
+                      ? "No Name"
                       : user!.name,
                   fontWeight: FontWeight.w500,
                 );
@@ -206,6 +203,8 @@ class _EditProfileState extends State<EditProfile> {
             const SizedBox(height: 40.0),
             _buildInputField("First Name", _firstNameController),
             _buildInputField("Last Name", _lastNameController),
+            _buildInputField("Address", _addressController),
+            _buildInputField("Phone", _phoneController),
             _buildInputField("Email", _emailController),
             const SizedBox(height: 40.0),
             PrimaryButton(
