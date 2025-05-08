@@ -81,7 +81,7 @@ android/build/
 
 android/app/.cxx/
 
-//mine
+#mine
 # Ignorar archivos generados por Flutter
 linux/flutter/generated_plugin_registrant.cc
 linux/flutter/generated_plugins.cmake
