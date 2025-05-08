@@ -14,7 +14,7 @@ class ProductosScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
@@ -57,26 +57,31 @@ class ProductosScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     side: const BorderSide(color: Colors.blueAccent, width: 1),
                   ),
+                  elevation: 4,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: producto.imagen.isNotEmpty
-                            ? (producto.imagen.startsWith('/')
-                                ? Image.file(
-                                    File(producto.imagen),
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.broken_image, size: 60);
-                                    },
-                                  )
-                                : Image.network(
-                                    producto.imagen,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return const Icon(Icons.broken_image, size: 60);
-                                    },
-                                  ))
-                            : const Icon(Icons.image_not_supported, size: 60),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                          child: producto.imagen.isNotEmpty
+                              ? (producto.imagen.startsWith('/')
+                                  ? Image.file(
+                                      File(producto.imagen),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Icon(Icons.broken_image, size: 60);
+                                      },
+                                    )
+                                  : Image.network(
+                                      producto.imagen,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return const Icon(Icons.broken_image, size: 60);
+                                      },
+                                    ))
+                              : const Icon(Icons.image_not_supported, size: 60),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -84,9 +89,21 @@ class ProductosScreen extends StatelessWidget {
                           children: [
                             Text(
                               producto.nombre,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                            Text('\$${producto.precio.toStringAsFixed(2)}'),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$${producto.precio.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                             ElevatedButton(
                               onPressed: () {
                                 Provider.of<CartProvider>(context, listen: false)
@@ -97,7 +114,14 @@ class ProductosScreen extends StatelessWidget {
                                   ),
                                 );
                               },
-                              child: const Text('Añadir al carrito'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue.shade900,
+                                foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text('Agregar al carrito'),
                             ),
                           ],
                         ),

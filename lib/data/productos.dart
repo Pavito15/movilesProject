@@ -38,7 +38,7 @@
 //   ),
 //   Producto(
 //     id: 6,
-//     nombre: 'Retinol crema de noche',
+//     nombre: '  ',
 //     precio: 315.0,
 //     imagen: 'assets/imagenes_productos/6.jpg',  
 //     descripcion: 'Protector solar con tono claro para tú protección, FPS 50, hidrata y humecta la piel',

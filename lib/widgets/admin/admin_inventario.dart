@@ -11,20 +11,20 @@ class AdminInventario extends StatefulWidget {
 }
 
 class _AdminInventarioState extends State<AdminInventario> {
-  int _selectedIndex = 1; 
+  int _selectedIndex = 1;
 
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (int) {  },)), 
+        MaterialPageRoute(builder: (context) => HomeScreen(onTabSelected: (int) {})),
       );
     } else if (index == 1) {
       // Mantente en la pantalla actual
     } else if (index == 2) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AdminWidget()), 
+        MaterialPageRoute(builder: (context) => const AdminWidget()),
       );
     }
   }
@@ -56,7 +56,22 @@ class _AdminInventarioState extends State<AdminInventario> {
 
               return ListTile(
                 title: Text(producto['nombre']),
-                subtitle: Text('Precio: \$${producto['precio']}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Precio: \$${producto['precio']}'),
+                    Row(
+                      children: [
+                        Text('Stock disponible: ${producto['stock']}'),
+                        const SizedBox(width: 8),
+                        Icon(
+                          producto['stock'] > 0 ? Icons.check_circle : Icons.cancel,
+                          color: producto['stock'] > 0 ? Colors.green : Colors.red,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
