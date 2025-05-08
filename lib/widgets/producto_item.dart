@@ -1,9 +1,10 @@
-import 'dart:io'; // Importa para manejar archivos locales
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/productos.dart';
 import '../provider/cardProvider.dart';
 import '../screens/producto_details.dart';
+import 'package:custom_rating_bar/custom_rating_bar.dart';
 
 class ProductoItem extends StatelessWidget {
   const ProductoItem({super.key, required this.producto});
@@ -25,70 +26,87 @@ class ProductoItem extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        color: Colors.blue[900],
-        child: Container(
-          width: 200,
-          height: 300,
-          padding: const EdgeInsets.all(12),
+        color: Colors.blue.shade900,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Mostrar la imagen del producto
-              Expanded(
-                child: producto.imagen.startsWith('/')
-                    ? Image.file(
-                        File(producto.imagen),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.broken_image, size: 60, color: Colors.white);
-                        },
-                      )
-                    : Image.network(
-                        producto.imagen,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.broken_image, size: 60, color: Colors.white);
-                        },
-                      ),
+              // Imagen del producto
+              Container(
+              height: 120,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: producto.imagen.startsWith('/')
+                ? Image.file(
+                  File(producto.imagen),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.broken_image, size: 60, color: Colors.grey);
+                  },
+                  )
+                : Image.network(
+                  producto.imagen,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.broken_image, size: 60, color: Colors.grey);
+                  },
+                  ),
               ),
               const SizedBox(height: 10),
-              Text(
+              // Nombre del producto
+              Flexible(
+              child: Text(
                 producto.nombre,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white, fontSize: 16),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 10),
+              ),
+              const SizedBox(height: 6),
+              // Precio del producto
               Text(
-                '\$${producto.precio.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              '\$${producto.precio.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 10),
-              FloatingActionButton(
+              ),
+              const SizedBox(height: 6),
+              // Mostrar el rating promedio
+              RatingBar.readOnly(
+              filledIcon: Icons.star,
+              emptyIcon: Icons.star_border,
+              initialRating: producto.rating,
+              maxRating: 5,
+              filledColor: Colors.orange,
+              size: 16,
+              ),
+              const SizedBox(height: 8),
+              // Icono para agregar al carrito
+              Container(
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: IconButton(
+                iconSize: 20, // Reduce el tamaño del icono
+                icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
                 onPressed: () {
-                  // Agregar el producto al carrito
-                  Provider.of<CartProvider>(context, listen: false).addToCart(producto);
-
-                  // Mostrar un mensaje de confirmación
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${producto.nombre} añadido al carrito'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
+                Provider.of<CartProvider>(context, listen: false).addToCart(producto);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                  content: Text('${producto.nombre} añadido al carrito'),
+                  duration: const Duration(seconds: 2),
+                  ),
+                );
                 },
-                mini: true,
-                backgroundColor: Colors.orange,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.add_shopping_cart,
-                  color: Colors.white,
-                ),
+              ),
               ),
             ],
           ),

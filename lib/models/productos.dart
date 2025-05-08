@@ -7,6 +7,8 @@ class Producto {
   final String imagen;
   final String descripcion;
   final int stock;
+  final double rating;
+  final int ratingCount;
 
   Producto({
     required this.id,
@@ -15,6 +17,8 @@ class Producto {
     required this.imagen,
     required this.descripcion,
     required this.stock,
+    required this.rating,
+    required this.ratingCount,
   });
 
   factory Producto.fromFirestore(DocumentSnapshot doc) {
@@ -26,6 +30,8 @@ class Producto {
       imagen: data['imagen'],
       descripcion: data['descripcion'],
       stock: data['stock'],
+      rating: data['rating'] ?? 0.0,
+      ratingCount: data['ratingCount'] ?? 0,
     );
   }
 
@@ -36,6 +42,8 @@ class Producto {
       'imagen': imagen,
       'descripcion': descripcion,
       'stock': stock,
+      'rating': rating,
+      'ratingCount': ratingCount,
     };
   }
 }
