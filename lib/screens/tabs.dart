@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:project_v1/screens/home_screens.dart';
-import 'package:project_v1/screens/shoppyCar.dart';
+import 'package:project_v1/screens/shoppy_car.dart';
 import 'package:project_v1/screens/productos.dart';
 import 'package:project_v1/widgets/menus/menu.dart';
 import 'package:provider/provider.dart';
-import '../provider/cardProvider.dart';
+import 'package:project_v1/screens/provider/card_provider.dart';
 
 class TabsScreen extends StatefulWidget {
   final int initialIndex;

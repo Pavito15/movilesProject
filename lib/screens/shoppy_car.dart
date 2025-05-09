@@ -1,8 +1,8 @@
-import 'dart:io'; // Importa para manejar archivos locales
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../provider/cardProvider.dart';
-import 'Payment/pay.dart'; // Importa la pantalla de pago
+import '../provider/card_provider.dart';
+import 'Payment/pay.dart'; 
 
 class ShoppyCar extends StatelessWidget {
   const ShoppyCar({super.key});
