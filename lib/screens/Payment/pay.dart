@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_v1/provider/cardProvider.dart';
+import 'package:project_v1/provider/card_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:project_v1/widgets/menus/custom_app_bar.dart';
 import 'package:project_v1/widgets/texts/custom_text_field.dart';

@@ -4,7 +4,7 @@ import 'package:project_v1/screens/tabs.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/productos.dart';
-import '../provider/cardProvider.dart';
+import '../provider/card_provider.dart';
 import 'package:custom_rating_bar/custom_rating_bar.dart';
 
 class DetalleProductoScreen extends StatefulWidget {
