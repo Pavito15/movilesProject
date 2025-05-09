@@ -4,7 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_v1/widgets/admin/admin_widget.dart';
-import 'package:project_v1/screens/home_screens.dart';
 import 'package:project_v1/screens/tabs.dart'; // Ensure TabsScreen is imported
 
 class AdminAddProducto extends StatefulWidget {
@@ -42,7 +41,7 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
 
         final downloadUrl = await snapshot.ref.getDownloadURL();
 
-        if (!mounted) return; // 👈 Verificamos si sigue montado
+        if (!mounted) return; 
         setState(() {
           _imageUrl = downloadUrl;
         });
@@ -51,13 +50,13 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
           const SnackBar(content: Text('Imagen subida exitosamente')),
         );
       } catch (e) {
-        if (!mounted) return; // 👈 Verificamos si sigue montado
+        if (!mounted) return; 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al subir la imagen: $e')),
         );
       }
     } else {
-      if (!mounted) return; // 👈 Verificamos si sigue montado
+      if (!mounted) return; 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No se seleccionó ninguna imagen')),
       );
@@ -80,7 +79,7 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
       try {
         await FirebaseFirestore.instance.collection('productos').add(nuevoProducto);
         
-        if (!mounted) return; // 👈 Verificamos si sigue montado
+        if (!mounted) return; 
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Producto "${_nombreController.text}" agregado exitosamente')),
@@ -95,13 +94,13 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
           _imageUrl = null;
         });
       } catch (e) {
-        if (!mounted) return; // 👈 Verificamos si sigue montado
+        if (!mounted) return; 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al guardar el producto: $e')),
         );
       }
     } else {
-      if (!mounted) return; // 👈 Verificamos si sigue montado
+      if (!mounted) return; 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor selecciona una imagen')),
       );
