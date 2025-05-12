@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:project_v1/screens/home_screens.dart';
-import 'package:project_v1/screens/shoppyCar.dart';
+import 'package:project_v1/screens/shoppy_car.dart';
 import 'package:project_v1/screens/productos.dart';
-import 'package:project_v1/widgets/menus/menu.dart';
 import 'package:provider/provider.dart';
-import '../provider/cardProvider.dart';
+import 'package:project_v1/provider/card_provider.dart';
 
 class TabsScreen extends StatefulWidget {
   final int initialIndex;
@@ -33,17 +32,14 @@ class _TabsScreenState extends State<TabsScreen> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       HomeScreen(onTabSelected: _selectPage),
-      const ShoppyCar(), // El carrito ahora se maneja con Provider
-      const ProductosScreen(), // Productos obtenidos desde Firestore
+      const ShoppyCar(),
+      const ProductosScreen(),
     ];
 
     final cartProvider = Provider.of<CartProvider>(context);
 
     return Scaffold(
-      drawer: MenuDrawer(
-        carrito: cartProvider.items.map((item) => item.producto).toList(),
-        onTabSelected: _selectPage,
-      ),
+      // Elimina la propiedad `drawer` para quitar el menú hamburguesa
       body: IndexedStack(
         index: _selectedPageIndex,
         children: pages,
