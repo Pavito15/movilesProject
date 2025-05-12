@@ -28,6 +28,7 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+
   void clearCart() {
     _items.clear(); // Vacía la lista de productos en el carrito
     notifyListeners(); // Notifica a los widgets que escuchan cambios
