@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/productos.dart';
 import 'producto_item.dart';
-import 'package:project_v1/widgets/menus/menu.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({super.key, required this.onTabSelected});
@@ -42,7 +41,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: MenuDrawer(carrito: [], onTabSelected: widget.onTabSelected),
+      // Eliminamos la propiedad `drawer`
       // RefeshIndicator para permitir la actualización de la lista al arrastrar hacia abajo
       body: RefreshIndicator(
         onRefresh: _fetchProductos,

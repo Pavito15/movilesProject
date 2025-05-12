@@ -18,15 +18,15 @@ class DetalleProductoScreen extends StatefulWidget {
 
 class DetalleProductoScreenState extends State<DetalleProductoScreen> {
   int cantidad = 1;
-  double userRating = 0.0; // Calificación del usuario
-  final int _selectedPageIndex = 2; // Indica que estamos en la pestaña de "Productos"
+  double userRating = 0.0;
+  final int _selectedPageIndex = 2;
 
   void _selectPage(int index) {
-    if (index == _selectedPageIndex) return; // Si ya está en la pestaña, no hacer nada
+    if (index == _selectedPageIndex) return;
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const TabsScreen()), // Regresa a TabsScreen
+      MaterialPageRoute(builder: (context) => const TabsScreen()),
     );
   }
 
@@ -51,14 +51,12 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
         });
       });
 
-      // ✅ Verificación de que el widget sigue montado
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gracias por calificar el producto')),
       );
     } catch (e) {
-      // ✅ Verificación de que el widget sigue montado
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,11 +81,24 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Imagen proporcional y centrada
+            // Imagen proporcional y centrada con borde azul
             Container(
+              margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 color: Colors.grey[200],
+                border: Border.all(
+                  color: Colors.blue.shade900, // Borde azul
+                  width: 2, // Grosor del borde
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               clipBehavior: Clip.antiAlias,
               child: widget.producto.imagen.startsWith('/')
@@ -112,8 +123,20 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(20),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,8 +1,8 @@
-import 'dart:io'; 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/card_provider.dart';
-import 'Payment/pay.dart'; 
+import 'Payment/pay.dart';
 
 class ShoppyCar extends StatelessWidget {
   const ShoppyCar({super.key});
@@ -83,12 +83,18 @@ class ShoppyCar extends StatelessWidget {
                           // Controles de cantidad
                           Row(
                             children: [
+                              // Botón de restar cantidad
                               IconButton(
-                                icon: const Icon(Icons.add, color: Colors.white),
+                                icon: const Icon(Icons.remove, color: Colors.white),
                                 onPressed: () {
-                                  cartProvider.addToCart(item.producto);
+                                  if (item.cantidad > 1) {
+                                    cartProvider.removeFromCart(item.producto);
+                                  } else {
+                                    cartProvider.removeFromCart(item.producto);
+                                  }
                                 },
                               ),
+                              // Cantidad
                               Text(
                                 '${item.cantidad}',
                                 style: const TextStyle(
@@ -97,6 +103,14 @@ class ShoppyCar extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              // Botón de sumar cantidad
+                              IconButton(
+                                icon: const Icon(Icons.add, color: Colors.white),
+                                onPressed: () {
+                                  cartProvider.addToCart(item.producto);
+                                },
+                              ),
+                              // Botón de eliminar producto
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.white),
                                 onPressed: () {

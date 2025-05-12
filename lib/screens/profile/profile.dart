@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:project_v1/provider/user_provider.dart';
+import 'package:project_v1/provider/theme_provider.dart'; // Importamos el ThemeProvider
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/edit_profile.dart';
 import 'package:project_v1/screens/profile/profile_data.dart';
@@ -19,32 +20,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final List<Map<String, dynamic>> listItems = const [
-    {
-      'title': 'Profile',
-      'leading': Icons.person_outline_rounded,
-      'trailing': Icons.arrow_forward_ios_rounded,
-      'destination': ProfileData(),
-    },
-    {
-      'title': 'Settings',
-      'leading': Icons.settings_outlined,
-      'trailing': Icons.arrow_forward_ios_rounded,
-      'destination': null,
-    },
-    {
-      'title': 'Admin Panel',
-      'leading': Icons.admin_panel_settings_outlined,
-      'trailing': Icons.arrow_forward_ios_rounded,
-      'destination': AdminWidget(),
-    },
-    {
-      'title': 'Log Out',
-      'leading': Icons.logout_outlined,
-      'trailing': Icons.arrow_forward_ios_rounded,
-      'destination': null,
-    },
-  ];
+  final List<Map<String, dynamic>> listItems = [];
 
   Future<void> _loadUserData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -60,6 +36,34 @@ class _ProfileState extends State<Profile> {
   void initState() {
     super.initState();
     _loadUserData();
+
+    // Configuramos los elementos del menú
+    listItems.addAll([
+      {
+        'title': 'Profile',
+        'leading': Icons.person_outline_rounded,
+        'trailing': Icons.arrow_forward_ios_rounded,
+        'destination': const ProfileData(),
+      },
+      {
+        'title': 'Theme Mode',
+        'leading': Icons.dark_mode_outlined,
+        'trailing': null,
+        'onTap': () => _showThemeDialog(),
+      },
+      {
+        'title': 'Admin Panel',
+        'leading': Icons.admin_panel_settings_outlined,
+        'trailing': Icons.arrow_forward_ios_rounded,
+        'destination': const AdminWidget(),
+      },
+      {
+        'title': 'Log Out',
+        'leading': Icons.logout_outlined,
+        'trailing': Icons.arrow_forward_ios_rounded,
+        'onTap': () => _signOut(),
+      },
+    ]);
   }
 
   Future<void> _signOut() async {
@@ -73,6 +77,42 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  void _showThemeDialog() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Seleccionar Tema'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<ThemeMode>(
+                title: const Text('Claro'),
+                value: ThemeMode.light,
+                groupValue: themeProvider.themeMode,
+                onChanged: (value) {
+                  themeProvider.toggleTheme(false);
+                  Navigator.of(context).pop();
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text('Oscuro'),
+                value: ThemeMode.dark,
+                groupValue: themeProvider.themeMode,
+                onChanged: (value) {
+                  themeProvider.toggleTheme(true);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
@@ -82,10 +122,16 @@ class _ProfileState extends State<Profile> {
       appBar: CustomAppBar(
         title: "Profile",
         onEdit: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const EditProfile()),
-          );
+          if (user != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EditProfile()),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No se puede editar el perfil. Usuario no disponible.')),
+            );
+          }
         },
       ),
       body: Padding(
@@ -100,32 +146,17 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               TitleText(
-                text: (user?.name == "") ? "No Name" : user!.name,
+                text: user?.name ?? "No Name", // Muestra "No Name" si el usuario es null
                 fontWeight: FontWeight.w500,
               ),
               SubtitleText(
-                text: user?.email ?? "correo@ejemplo.com",
+                text: user?.email ?? "correo@ejemplo.com", // Muestra un correo predeterminado si es null
                 fontSize: 20,
               ),
               const SizedBox(height: 20.0),
               const SizedBox(height: 20),
               CustomMenuProfile(
-                listItems: listItems.map((item) {
-                  if (item['title'] == 'Log Out') {
-                    return {
-                      'title': item['title'],
-                      'leading': item['leading'],
-                      'trailing': item['trailing'],
-                      'onTap': () => _signOut(),
-                    };
-                  }
-                  return {
-                    'title': item['title'],
-                    'leading': item['leading'],
-                    'trailing': item['trailing'],
-                    'destination': item['destination'],
-                  };
-                }).toList(),
+                listItems: listItems,
               ),
               const SizedBox(height: 20.0),
             ],
