@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
+import '../services/auth_service.dart';
 
 class CartItem {
   final Producto producto;
@@ -9,7 +10,27 @@ class CartItem {
 }
 
 class CartProvider extends ChangeNotifier {
+  final AuthService _authService;
   final List<CartItem> _items = [];
+
+  // Constructor que recibe el AuthService
+  CartProvider(this._authService) {
+    // Escuchar cambios en la autenticación
+    _authService.addListener(_onAuthChanged);
+  }
+
+  @override
+  void dispose() {
+    // Importante remover el listener para evitar memory leaks
+    _authService.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  // Este método se ejecuta cada vez que cambia el estado de autenticación
+  void _onAuthChanged() {
+    // Limpiar carrito cuando el usuario cambia
+    clearCart();
+  }
 
   List<CartItem> get items => _items;
 
@@ -20,7 +41,7 @@ class CartProvider extends ChangeNotifier {
     } else {
       _items.add(CartItem(producto: producto));
     }
-    notifyListeners(); // Notifica a los widgets que escuchan cambios
+    notifyListeners();
   }
 
   void removeFromCart(Producto producto) {
@@ -29,8 +50,9 @@ class CartProvider extends ChangeNotifier {
   }
 
   void clearCart() {
-    _items.clear(); // Vacía la lista de productos en el carrito
-    notifyListeners(); // Notifica a los widgets que escuchan cambios
+    _items.clear();
+    notifyListeners();
+    debugPrint('Cart cleared');
   }
 
   int get totalItems => _items.fold(0, (sum, item) => sum + item.cantidad);

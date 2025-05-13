@@ -35,11 +35,25 @@ class _SignupState extends State<Signup> {
 
     final token = await FirebaseMessaging.instance.getToken();
 
+    // Obtener el nombre del correo electrónico si no hay displayName
+    String displayName = '';
+    String firstName = '';
+
+    if (user.displayName != null && user.displayName!.isNotEmpty) {
+      displayName = user.displayName!;
+      firstName = displayName.split(' ').first;
+    } else if (user.email != null && user.email!.isNotEmpty) {
+      // Usar la parte antes del @ como nombre de usuario predeterminado
+      firstName = user.email!.split('@').first;
+    }
+
     await users.doc(user.uid).set({
       'email': user.email ?? '',
       'isActive': true,
-      'name': user.displayName?.split(' ').first ?? '',
-      'surname': user.displayName?.split(' ').skip(1).join(' ') ?? '',
+      'name': firstName,
+      'surname': user.displayName != null
+          ? user.displayName!.split(' ').skip(1).join(' ')
+          : '',
       'phone': user.phoneNumber ?? '',
       'pictureProfile': user.photoURL ?? '',
       'provider': provider,

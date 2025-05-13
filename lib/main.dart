@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:project_v1/provider/card_provider.dart';
 import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/provider/order_provider.dart';
+import 'package:project_v1/services/auth_service.dart';
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/profile.dart';
 import 'package:project_v1/screens/tabs.dart';
@@ -14,12 +15,29 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()), // CartProvider
-        ChangeNotifierProvider(create: (_) => UserProvider()), // UserProvider
-        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        // Primero creamos el servicio de autenticación
+        ChangeNotifierProvider(create: (_) => AuthService()),
+
+        // Luego los providers que dependen del AuthService
+        ChangeNotifierProxyProvider<AuthService, CartProvider>(
+          create: (context) => CartProvider(context.read<AuthService>()),
+          update: (context, authService, previous) =>
+              previous ?? CartProvider(authService),
+        ),
+        ChangeNotifierProxyProvider<AuthService, UserProvider>(
+          create: (context) => UserProvider(context.read<AuthService>()),
+          update: (context, authService, previous) =>
+              previous ?? UserProvider(authService),
+        ),
+        ChangeNotifierProxyProvider<AuthService, OrderProvider>(
+          create: (context) => OrderProvider(context.read<AuthService>()),
+          update: (context, authService, previous) =>
+              previous ?? OrderProvider(authService),
+        ),
       ],
       child: const MyApp(),
     ),

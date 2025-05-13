@@ -1,11 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:project_v1/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_v1/services/auth_service.dart';
 
 class UserProvider with ChangeNotifier {
+  final AuthService _authService;
   UserModel? _user;
 
+  UserProvider(this._authService) {
+    // Escuchar cambios en la autenticación
+    _authService.addListener(_onAuthChanged);
+  }
+
+  @override
+  void dispose() {
+    _authService.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  // Este método se ejecuta cada vez que cambia el estado de autenticación
+  void _onAuthChanged() {
+    if (!_authService.isAuthenticated) {
+      // Si el usuario cierra sesión, limpiamos los datos
+      clearUser();
+    } else {
+      // Si hay un usuario autenticado, cargamos sus datos
+      final userId = _authService.userId;
+      if (userId != null) {
+        getUserData(userId);
+      }
+    }
+  }
+
   UserModel? get user => _user;
+
+  // Limpiar datos del usuario
+  void clearUser() {
+    _user = null;
+    notifyListeners();
+    debugPrint('User data cleared');
+  }
 
   // Actualizar el usuario en el provider
   void setUser(UserModel user) {

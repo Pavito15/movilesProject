@@ -3,10 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/provider/theme_provider.dart'; // Importamos el ThemeProvider
+import 'package:project_v1/services/auth_service.dart'; // Importamos el AuthService
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/edit_profile.dart';
 import 'package:project_v1/screens/profile/profile_data.dart';
-import 'package:project_v1/screens/profile/my_orders_screen.dart';
+import 'package:project_v1/screens/profile/my_orders_screen.dart'; // Importamos MyOrdersScreen
 import 'package:project_v1/widgets/custom_image_avatar.dart';
 import 'package:project_v1/widgets/menus/custom_app_bar.dart';
 import 'package:project_v1/widgets/menus/custom_menu_profile.dart';
@@ -74,7 +75,9 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
+    // Usar el AuthService para cerrar sesión
+    await Provider.of<AuthService>(context, listen: false).signOut();
+
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -155,13 +158,14 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               TitleText(
-                text: user?.name ??
-                    "No Name", // Muestra "No Name" si el usuario es null
+                text:
+                    (user == null || user.name.isEmpty) ? "No Name" : user.name,
                 fontWeight: FontWeight.w500,
               ),
               SubtitleText(
-                text: user?.email ??
-                    "correo@ejemplo.com", // Muestra un correo predeterminado si es null
+                text: (user == null || user.email.isEmpty)
+                    ? "correo@ejemplo.com"
+                    : user.email,
                 fontSize: 20,
               ),
               const SizedBox(height: 20.0),
