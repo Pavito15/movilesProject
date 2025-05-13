@@ -22,8 +22,6 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final List<Map<String, dynamic>> listItems = [];
-
   Future<void> _loadUserData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final user = FirebaseAuth.instance.currentUser;
@@ -38,40 +36,6 @@ class _ProfileState extends State<Profile> {
   void initState() {
     super.initState();
     _loadUserData();
-
-    // Configuramos los elementos del menú
-    listItems.addAll([
-      {
-        'title': 'Profile',
-        'leading': Icons.person_outline_rounded,
-        'trailing': Icons.arrow_forward_ios_rounded,
-        'destination': const ProfileData(),
-      },
-      {
-        'title': 'My Orders',
-        'leading': Icons.inventory_2_outlined,
-        'trailing': Icons.arrow_forward_ios_rounded,
-        'destination': const MyOrdersScreen(),
-      },
-      {
-        'title': 'Theme Mode',
-        'leading': Icons.dark_mode_outlined,
-        'trailing': null,
-        'onTap': () => _showThemeDialog(),
-      },
-      {
-        'title': 'Admin Panel',
-        'leading': Icons.admin_panel_settings_outlined,
-        'trailing': Icons.arrow_forward_ios_rounded,
-        'destination': const AdminWidget(),
-      },
-      {
-        'title': 'Log Out',
-        'leading': Icons.logout_outlined,
-        'trailing': Icons.arrow_forward_ios_rounded,
-        'onTap': () => _signOut(),
-      },
-    ]);
   }
 
   Future<void> _signOut() async {
@@ -127,6 +91,41 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
+
+    // Construye la lista de items dinámicamente según el rol
+    final List<Map<String, dynamic>> listItems = [
+      {
+        'title': 'Profile',
+        'leading': Icons.person_outline_rounded,
+        'trailing': Icons.arrow_forward_ios_rounded,
+        'destination': const ProfileData(),
+      },
+      {
+        'title': 'My Orders',
+        'leading': Icons.inventory_2_outlined,
+        'trailing': Icons.arrow_forward_ios_rounded,
+        'destination': const MyOrdersScreen(),
+      },
+      {
+        'title': 'Theme Mode',
+        'leading': Icons.dark_mode_outlined,
+        'trailing': null,
+        'onTap': () => _showThemeDialog(),
+      },
+      if (user != null && user.role == 'admin') // Solo admins ven este item
+        {
+          'title': 'Admin Panel',
+          'leading': Icons.admin_panel_settings_outlined,
+          'trailing': Icons.arrow_forward_ios_rounded,
+          'destination': const AdminWidget(),
+        },
+      {
+        'title': 'Log Out',
+        'leading': Icons.logout_outlined,
+        'trailing': Icons.arrow_forward_ios_rounded,
+        'onTap': () => _signOut(),
+      },
+    ];
 
     return Scaffold(
       appBar: CustomAppBar(
