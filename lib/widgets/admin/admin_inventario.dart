@@ -12,7 +12,7 @@ class AdminInventario extends StatefulWidget {
 }
 
 class _AdminInventarioState extends State<AdminInventario> {
-  int _selectedIndex = 1;
+  final int _selectedIndex = 1;
   List<Producto> productos = [];
   bool isLoading = false;
 
