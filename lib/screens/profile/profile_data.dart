@@ -82,7 +82,10 @@ class _ProfileDataState extends State<ProfileData> {
               Padding(
                 padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                 child: CustomImageAvatar(
-                  imagePath: "assets/images_icons/avatar_men.png",
+                  imagePath: (user != null && user.pictureProfile.isNotEmpty)
+                      ? user.pictureProfile
+                      : "assets/images_icons/avatar_men.png",
+                  isAsset: (user == null || user.pictureProfile.isEmpty),
                 ),
               ),
               TitleText(

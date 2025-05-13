@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,17 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final List<Map<String, dynamic>> listItems = [];
+
+  // Verifica si un archivo de imagen existe y es accesible
+  bool _isValidImagePath(String path) {
+    if (path.isEmpty) return false;
+    try {
+      final file = File(path);
+      return file.existsSync();
+    } catch (e) {
+      return false;
+    }
+  }
 
   Future<void> _loadUserData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -140,7 +152,8 @@ class _ProfileState extends State<Profile> {
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('No se puede editar el perfil. Usuario no disponible.'),
+                content: Text(
+                    'No se puede editar el perfil. Usuario no disponible.'),
               ),
             );
           }
@@ -154,7 +167,14 @@ class _ProfileState extends State<Profile> {
               Padding(
                 padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
                 child: CustomImageAvatar(
-                  imagePath: "assets/images_icons/avatar_men.png",
+                  imagePath: (user != null &&
+                          user.pictureProfile.isNotEmpty &&
+                          _isValidImagePath(user.pictureProfile))
+                      ? user.pictureProfile
+                      : "assets/images_icons/avatar_men.png",
+                  isAsset: (user == null ||
+                      user.pictureProfile.isEmpty ||
+                      !_isValidImagePath(user.pictureProfile)),
                 ),
               ),
               TitleText(

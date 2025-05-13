@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_v1/screens/login/signin.dart';
@@ -9,6 +10,7 @@ import 'package:project_v1/widgets/custom_image_avatar.dart';
 import 'package:project_v1/widgets/menus/custom_app_bar.dart';
 import 'package:project_v1/widgets/texts/custom_text_field.dart';
 import 'package:project_v1/widgets/texts/customs_texts.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -24,6 +26,8 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ImagePicker _picker = ImagePicker();
+  String? _selectedImagePath;
 
   @override
   void initState() {
@@ -32,6 +36,16 @@ class _EditProfileState extends State<EditProfile> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserData();
     });
+  } // Verifica si un archivo de imagen existe y es accesible
+
+  bool _isValidImagePath(String path) {
+    if (path.isEmpty) return false;
+    try {
+      final file = File(path);
+      return file.existsSync();
+    } catch (e) {
+      return false;
+    }
   }
 
   void _loadUserData() {
@@ -45,6 +59,14 @@ class _EditProfileState extends State<EditProfile> {
         _emailController.text = user.email;
         _addressController.text = user.address;
         _phoneController.text = user.phone;
+
+        // Verificar si hay una ruta de imagen guardada y si el archivo existe
+        if (user.pictureProfile.isNotEmpty &&
+            _isValidImagePath(user.pictureProfile)) {
+          _selectedImagePath = user.pictureProfile;
+        } else {
+          _selectedImagePath = null;
+        }
       });
     }
   }
@@ -135,6 +157,7 @@ class _EditProfileState extends State<EditProfile> {
           surname: _lastNameController.text.trim(),
           address: _addressController.text.trim(),
           phone: _phoneController.text.trim(),
+          pictureProfile: _selectedImagePath ?? currentUser.pictureProfile,
         );
 
         // Actualizar los datos en Firestore
@@ -152,6 +175,58 @@ class _EditProfileState extends State<EditProfile> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al actualizar el perfil: $e')),
+        );
+      }
+    }
+  }
+
+  // Método para seleccionar una imagen de la galería
+  Future<void> _pickImage() async {
+    try {
+      // Muestra un diálogo con opciones para seleccionar foto
+      await showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: Wrap(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Seleccionar de la galería'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    // Usar image_picker para seleccionar de la galería
+                    final XFile? image = await _picker.pickImage(
+                      source: ImageSource.gallery,
+                      imageQuality:
+                          80, // Reducir calidad para mejor rendimiento
+                    );
+                    if (image != null && mounted) {
+                      setState(() {
+                        _selectedImagePath = image.path;
+                      });
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: const Text('Eliminar foto actual'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _selectedImagePath = "";
+                    });
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al seleccionar imagen: $e')),
         );
       }
     }
@@ -176,10 +251,13 @@ class _EditProfileState extends State<EditProfile> {
         padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
         child: Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 20.0, bottom: 10.0),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
               child: CustomImageAvatar(
-                  imagePath: "assets/images_icons/avatar_men.png"),
+                imagePath:
+                    _selectedImagePath ?? "assets/images_icons/avatar_men.png",
+                isAsset: _selectedImagePath == null,
+              ),
             ),
             Consumer<UserProvider>(
               builder: (context, userProvider, child) {
@@ -198,7 +276,7 @@ class _EditProfileState extends State<EditProfile> {
               fontWeight: FontWeight.w600,
               fontSize: 20,
               decoration: TextDecoration.none,
-              onPressed: () {},
+              onPressed: _pickImage,
             ),
             const SizedBox(height: 40.0),
             _buildInputField("First Name", _firstNameController),
