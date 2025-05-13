@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:project_v1/provider/card_provider.dart';
 import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/provider/theme_provider.dart';
+import 'package:project_v1/provider/order_provider.dart';
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/profile.dart';
 import 'package:project_v1/screens/tabs.dart';
@@ -20,6 +21,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CartProvider()), // CartProvider
         ChangeNotifierProvider(create: (_) => UserProvider()), // UserProvider
         ChangeNotifierProvider(create: (_) => ThemeProvider()), // ThemeProvider
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: const MyApp(),
     ),
