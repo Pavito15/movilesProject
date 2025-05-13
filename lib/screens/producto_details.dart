@@ -320,34 +320,6 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
               size: 30,
             ),
             const SizedBox(height: 20),
-
-            // Calificación del usuario
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Califica este producto',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 8),
-            RatingBar(
-              filledIcon: Icons.star,
-              emptyIcon: Icons.star_border,
-              onRatingChanged: (rating) {
-                setState(() {
-                  userRating = rating;
-                });
-              },
-              initialRating: 0,
-              maxRating: 5,
-              filledColor: Colors.orange,
-              size: 30,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitRating,
-              child: const Text('Enviar Calificación'),
-            ),
           ],
         ),
       ),

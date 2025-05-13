@@ -1,7 +1,8 @@
-import 'package:project_v1/firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:project_v1/firebase_options.dart';
 import 'package:project_v1/provider/card_provider.dart';
 import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/provider/theme_provider.dart';
@@ -16,6 +17,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  Stripe.publishableKey =
+      'pk_test_51RODr0Fh3PHwMx28WQvJLMRJwsgFenk01fGvgdaT6mGcQPpxJxJITBjrm8etEuy7jvDaOEyDIYl96kpZSs7qTiBh00Wx9TREdw';
 
   runApp(
     MultiProvider(

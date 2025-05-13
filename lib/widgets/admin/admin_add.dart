@@ -108,7 +108,7 @@ class _AdminAddProductoState extends State<AdminAddProducto> {
   }
 
 
-  int _selectedIndex = 1;
+  final int _selectedIndex = 1;
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.push(
