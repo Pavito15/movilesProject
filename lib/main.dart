@@ -8,9 +8,10 @@ import 'package:project_v1/provider/user_provider.dart';
 import 'package:project_v1/provider/theme_provider.dart';
 import 'package:project_v1/provider/order_provider.dart';
 import 'package:project_v1/services/auth_service.dart';
-import 'package:project_v1/screens/login/signin.dart';
+// import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/profile.dart';
 import 'package:project_v1/screens/tabs.dart';
+import 'package:project_v1/screens/profile/landing_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +72,7 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
           themeMode: themeProvider.themeMode, // Escucha el ThemeProvider
-          home: const Signin(), // Pantalla inicial de inicio de sesión
+          home: const LandingPage(), // Pantalla inicial de inicio de sesión
           routes: {
             '/profile': (context) =>
                 const Profile(), // Ruta a la pantalla de perfil

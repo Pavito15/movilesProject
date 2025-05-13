@@ -138,6 +138,21 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final userFirebase = FirebaseAuth.instance.currentUser;
+
+    if (userFirebase == null) {
+      // Redirigir de inmediato si no hay sesión
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const Signin()),
+        );
+      });
+
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final user = userProvider.user;
 
     return Scaffold(
