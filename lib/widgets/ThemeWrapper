@@ -1,0 +1,55 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:project_v1/provider/theme_provider.dart';
+import 'package:project_v1/screens/login/signin.dart';
+import 'package:project_v1/screens/profile/profile.dart';
+import 'package:project_v1/screens/tabs.dart';
+
+class ThemeWrapper extends StatelessWidget {
+  const ThemeWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context); // Escucha el ThemeProvider
+
+    return MaterialApp(
+      title: 'CLEORGANIC',
+      themeMode: themeProvider.themeMode, // Vincula el ThemeMode al ThemeProvider
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
+        primarySwatch: Colors.blue,
+        brightness: Brightness.light,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      darkTheme: ThemeData(
+        scaffoldBackgroundColor: Colors.black,
+        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      home: const Signin(), // Pantalla inicial de inicio de sesión
+      routes: {
+        '/profile': (context) => const Profile(), // Ruta a la pantalla de perfil
+        '/main': (context) => const TabsScreen(), // Ruta a la pantalla principal (TabsScreen)
+      },
+    );
+  }
+}

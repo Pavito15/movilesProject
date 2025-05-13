@@ -36,7 +36,7 @@ class _TabsScreenState extends State<TabsScreen> {
       const ProductosScreen(),
     ];
 
-    final cartProvider = Provider.of<CartProvider>(context);
+    Provider.of<CartProvider>(context);
 
     return Scaffold(
       // Elimina la propiedad `drawer` para quitar el menú hamburguesa

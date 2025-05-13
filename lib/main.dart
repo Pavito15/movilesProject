@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:project_v1/provider/card_provider.dart';
 import 'package:project_v1/provider/user_provider.dart';
+import 'package:project_v1/provider/theme_provider.dart';
 import 'package:project_v1/provider/order_provider.dart';
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/profile.dart';
@@ -19,6 +20,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()), // CartProvider
         ChangeNotifierProvider(create: (_) => UserProvider()), // UserProvider
+        ChangeNotifierProvider(create: (_) => ThemeProvider()), // ThemeProvider
         ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: const MyApp(),
@@ -31,18 +33,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'CLEORGANIC',
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        primarySwatch: Colors.blue,
-      ),
-      home: const Signin(), // Pantalla inicial de inicio de sesión
-      routes: {
-        '/profile': (context) =>
-            const Profile(), // Ruta a la pantalla de perfil
-        '/main': (context) =>
-            const TabsScreen(), // Ruta a la pantalla principal (TabsScreen)
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'CLEORGANIC',
+          theme: ThemeData(
+            scaffoldBackgroundColor: Colors.white,
+            primarySwatch: Colors.blue,
+          ),
+          darkTheme: ThemeData(
+            scaffoldBackgroundColor: Colors.black,
+            primarySwatch: Colors.blue,
+            brightness: Brightness.dark,
+          ),
+          themeMode: themeProvider.themeMode, // Escucha el ThemeProvider
+          home: const Signin(), // Pantalla inicial de inicio de sesión
+          routes: {
+            '/profile': (context) => const Profile(), // Ruta a la pantalla de perfil
+            '/main': (context) => const TabsScreen(), // Ruta a la pantalla principal (TabsScreen)
+          },
+        );
       },
     );
   }
