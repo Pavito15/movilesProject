@@ -66,8 +66,10 @@ class MyApp extends StatelessWidget {
           themeMode: themeProvider.themeMode, // Escucha el ThemeProvider
           home: const Signin(), // Pantalla inicial de inicio de sesión
           routes: {
-            '/profile': (context) => const Profile(), // Ruta a la pantalla de perfil
-            '/main': (context) => const TabsScreen(), // Ruta a la pantalla principal (TabsScreen)
+            '/profile': (context) =>
+                const Profile(), // Ruta a la pantalla de perfil
+            '/main': (context) =>
+                const TabsScreen(), // Ruta a la pantalla principal (TabsScreen)
           },
         );
       },
