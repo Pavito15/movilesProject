@@ -6,6 +6,7 @@ import 'package:project_v1/provider/theme_provider.dart'; // Importamos el Theme
 import 'package:project_v1/screens/login/signin.dart';
 import 'package:project_v1/screens/profile/edit_profile.dart';
 import 'package:project_v1/screens/profile/profile_data.dart';
+import 'package:project_v1/screens/profile/my_orders_screen.dart';
 import 'package:project_v1/widgets/custom_image_avatar.dart';
 import 'package:project_v1/widgets/menus/custom_app_bar.dart';
 import 'package:project_v1/widgets/menus/custom_menu_profile.dart';
@@ -44,6 +45,12 @@ class _ProfileState extends State<Profile> {
         'leading': Icons.person_outline_rounded,
         'trailing': Icons.arrow_forward_ios_rounded,
         'destination': const ProfileData(),
+      },
+      {
+        'title': 'My Orders',
+        'leading': Icons.inventory_2_outlined,
+        'trailing': Icons.arrow_forward_ios_rounded,
+        'destination': const MyOrdersScreen(),
       },
       {
         'title': 'Theme Mode',
@@ -129,7 +136,9 @@ class _ProfileState extends State<Profile> {
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No se puede editar el perfil. Usuario no disponible.')),
+              const SnackBar(
+                  content: Text(
+                      'No se puede editar el perfil. Usuario no disponible.')),
             );
           }
         },
@@ -146,11 +155,13 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               TitleText(
-                text: user?.name ?? "No Name", // Muestra "No Name" si el usuario es null
+                text: user?.name ??
+                    "No Name", // Muestra "No Name" si el usuario es null
                 fontWeight: FontWeight.w500,
               ),
               SubtitleText(
-                text: user?.email ?? "correo@ejemplo.com", // Muestra un correo predeterminado si es null
+                text: user?.email ??
+                    "correo@ejemplo.com", // Muestra un correo predeterminado si es null
                 fontSize: 20,
               ),
               const SizedBox(height: 20.0),

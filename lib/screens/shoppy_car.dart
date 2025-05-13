@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/card_provider.dart';
-import 'Payment/pay.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ShoppyCar extends StatelessWidget {
   const ShoppyCar({super.key});
@@ -23,7 +24,8 @@ class ShoppyCar extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = cartProvider.items[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
                   child: Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -33,29 +35,20 @@ class ShoppyCar extends StatelessWidget {
                       padding: const EdgeInsets.all(12.0),
                       child: Row(
                         children: [
-                          // Imagen del producto
                           item.producto.imagen.startsWith('/')
                               ? Image.file(
                                   File(item.producto.imagen),
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(Icons.broken_image, size: 50, color: Colors.white);
-                                  },
                                 )
                               : Image.network(
                                   item.producto.imagen,
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(Icons.broken_image, size: 50, color: Colors.white);
-                                  },
                                 ),
                           const SizedBox(width: 12),
-
-                          // Información del producto
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,22 +72,15 @@ class ShoppyCar extends StatelessWidget {
                               ],
                             ),
                           ),
-
-                          // Controles de cantidad
                           Row(
                             children: [
-                              // Botón de restar cantidad
                               IconButton(
-                                icon: const Icon(Icons.remove, color: Colors.white),
+                                icon: const Icon(Icons.remove,
+                                    color: Colors.white),
                                 onPressed: () {
-                                  if (item.cantidad > 1) {
-                                    cartProvider.removeFromCart(item.producto);
-                                  } else {
-                                    cartProvider.removeFromCart(item.producto);
-                                  }
+                                  cartProvider.removeFromCart(item.producto);
                                 },
                               ),
-                              // Cantidad
                               Text(
                                 '${item.cantidad}',
                                 style: const TextStyle(
@@ -103,16 +89,16 @@ class ShoppyCar extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              // Botón de sumar cantidad
                               IconButton(
-                                icon: const Icon(Icons.add, color: Colors.white),
+                                icon:
+                                    const Icon(Icons.add, color: Colors.white),
                                 onPressed: () {
                                   cartProvider.addToCart(item.producto);
                                 },
                               ),
-                              // Botón de eliminar producto
                               IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.white),
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.white),
                                 onPressed: () {
                                   cartProvider.removeFromCart(item.producto);
                                 },
@@ -130,7 +116,6 @@ class ShoppyCar extends StatelessWidget {
           ? Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Total de compra
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -142,34 +127,59 @@ class ShoppyCar extends StatelessWidget {
                     children: [
                       const Text(
                         "Total:",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        "\$${cartProvider.items.fold(0.0, (total, item) => total + (item.producto.precio * item.cantidad)).toStringAsFixed(2)}",
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        "\$${cartProvider.totalPrice.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Botón para proceder al pago
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (cartProvider.items.isNotEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PaymentScreen(
-                              totalCompra: cartProvider.items.fold(
-                                0,
-                                (total, item) => total + (item.producto.precio * item.cantidad),
-                              ),
-                            ),
-                          ),
-                        );
+                        try {
+                          final userId = FirebaseAuth.instance.currentUser!.uid;
+                          final products = cartProvider.items
+                              .map((item) => {
+                                    'productId': item.producto.id,
+                                    'nombre': item.producto.nombre,
+                                    'precio': item.producto.precio,
+                                    'cantidad': item.cantidad,
+                                  })
+                              .toList();
+
+                          final total = cartProvider.totalPrice;
+
+                          await FirebaseFirestore.instance
+                              .collection('orders')
+                              .add({
+                            'userId': userId,
+                            'products': products,
+                            'total': total,
+                            'status': 'pending',
+                            'createdAt': FieldValue.serverTimestamp(),
+                          });
+
+                          cartProvider.clearCart();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Pedido realizado con éxito')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('Error al realizar el pedido: $e')),
+                          );
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -180,7 +190,7 @@ class ShoppyCar extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Proceder al pago',
+                      'Confirmar compra',
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
