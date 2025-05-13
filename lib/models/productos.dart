@@ -35,6 +35,9 @@ class Producto {
     );
   }
 
+  /// Método para verificar si el producto está disponible
+  bool get estaDisponible => stock > 0;
+
   Map<String, dynamic> toFirestore() {
     return {
       'nombre': nombre,
