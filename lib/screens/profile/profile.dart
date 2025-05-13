@@ -93,7 +93,7 @@ class _ProfileState extends State<Profile> {
                 value: ThemeMode.light,
                 groupValue: themeProvider.themeMode,
                 onChanged: (value) {
-                  themeProvider.toggleTheme(false);
+                  themeProvider.toggleTheme(ThemeMode.light);
                   Navigator.of(context).pop();
                 },
               ),
@@ -102,10 +102,10 @@ class _ProfileState extends State<Profile> {
                 value: ThemeMode.dark,
                 groupValue: themeProvider.themeMode,
                 onChanged: (value) {
-                  themeProvider.toggleTheme(true);
+                  themeProvider.toggleTheme(ThemeMode.dark);
                   Navigator.of(context).pop();
                 },
-              ),
+              )
             ],
           ),
         );
@@ -129,7 +129,9 @@ class _ProfileState extends State<Profile> {
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No se puede editar el perfil. Usuario no disponible.')),
+              const SnackBar(
+                content: Text('No se puede editar el perfil. Usuario no disponible.'),
+              ),
             );
           }
         },
