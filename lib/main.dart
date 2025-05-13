@@ -20,6 +20,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        // Provider para el tema
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+
         // Primero creamos el servicio de autenticación
         ChangeNotifierProvider(create: (_) => AuthService()),
 

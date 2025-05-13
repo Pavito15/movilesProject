@@ -58,7 +58,7 @@ class UserProvider with ChangeNotifier {
         setUser(user); // Actualiza el estado con los datos obtenidos
       }
     } catch (e) {
-      print("Error al obtener los datos del usuario: $e");
+      debugPrint("Error al obtener los datos del usuario: $e");
     }
   }
 
@@ -73,7 +73,7 @@ class UserProvider with ChangeNotifier {
       // Después de actualizar, también actualizamos el modelo en el provider
       setUser(updatedUser);
     } catch (e) {
-      print("Error al actualizar los datos del usuario: $e");
+      debugPrint("Error al actualizar los datos del usuario: $e");
     }
   }
 
@@ -84,7 +84,7 @@ class UserProvider with ChangeNotifier {
       _user = null; // Restablece el estado del usuario
       notifyListeners();
     } catch (e) {
-      print("Error al eliminar el usuario: $e");
+      debugPrint("Error al eliminar el usuario: $e");
     }
   }
 }
