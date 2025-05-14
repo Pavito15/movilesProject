@@ -18,7 +18,7 @@ class ShoppyCar extends StatelessWidget {
       final amount = (total * 100).toInt();
 
       final response = await http.post(
-        Uri.parse('http://172.17.208.1:3000/create-payment-intent'),
+        Uri.parse('http://192.168.100.46:3000/create-payment-intent'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'amount': amount,

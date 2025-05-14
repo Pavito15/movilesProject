@@ -355,6 +355,26 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
               widget.producto.descripcion,
               style: const TextStyle(fontSize: 16, color: Colors.black54),
             ),
+            const SizedBox(height: 20),
+
+            // Rating promedio
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Calificación promedio',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 8),
+            RatingBar.readOnly(
+              filledIcon: Icons.star,
+              emptyIcon: Icons.star_border,
+              initialRating: widget.producto.rating,
+              maxRating: 5,
+              filledColor: Colors.orange,
+              size: 30,
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
