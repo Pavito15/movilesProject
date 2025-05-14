@@ -191,20 +191,6 @@ class _SigninState extends State<Signin> {
                 controller: _passwordController,
                 isPassword: true,
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: CustomTextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RecoveryPassword(),
-                      ),
-                    );
-                  },
-                  text: "Forgot Password?",
-                ),
-              ),
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
