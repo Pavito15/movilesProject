@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
 import 'package:http/http.dart' as http;
-import 'package:project_v1/screens/login/signin.dart'; // 👈 Asegúrate de importar Signin
+import 'package:project_v1/screens/login/signin.dart';
 
 class ShoppyCar extends StatelessWidget {
   const ShoppyCar({super.key});
@@ -18,7 +18,7 @@ class ShoppyCar extends StatelessWidget {
       final amount = (total * 100).toInt();
 
       final response = await http.post(
-        Uri.parse('http://192.168.100.46:3000/create-payment-intent'),
+        Uri.parse('http://172.17.208.1:3000/create-payment-intent'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'amount': amount,
