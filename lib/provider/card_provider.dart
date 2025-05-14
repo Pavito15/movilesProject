@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_v1/services/auth_service.dart';
 import '../models/productos.dart';
-import '../services/auth_service.dart';
 
 class CartItem {
   final Producto producto;
@@ -10,38 +11,49 @@ class CartItem {
 }
 
 class CartProvider extends ChangeNotifier {
-  final AuthService _authService;
   final List<CartItem> _items = [];
 
-  // Constructor que recibe el AuthService
-  CartProvider(this._authService) {
-    // Escuchar cambios en la autenticación
-    _authService.addListener(_onAuthChanged);
-  }
-
-  @override
-  void dispose() {
-    // Importante remover el listener para evitar memory leaks
-    _authService.removeListener(_onAuthChanged);
-    super.dispose();
-  }
-
-  // Este método se ejecuta cada vez que cambia el estado de autenticación
-  void _onAuthChanged() {
-    // Limpiar carrito cuando el usuario cambia
-    clearCart();
-  }
+  CartProvider(AuthService authService);
 
   List<CartItem> get items => _items;
 
-  void addToCart(Producto producto) {
-    final index = _items.indexWhere((item) => item.producto.id == producto.id);
-    if (index >= 0) {
-      _items[index].cantidad++;
+  /// Método para agregar un producto al carrito y reducir el stock en Firebase
+  Future<void> addToCart(Producto producto) async {
+    if (producto.stock > 0) {
+      final index = _items.indexWhere((item) => item.producto.id == producto.id);
+      if (index >= 0) {
+        _items[index].cantidad++;
+      } else {
+        _items.add(CartItem(producto: producto));
+      }
+
+      // Reducir el stock en Firebase
+      try {
+        final docRef = FirebaseFirestore.instance.collection('productos').doc(producto.id);
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          final snapshot = await transaction.get(docRef);
+
+          if (!snapshot.exists) {
+            throw Exception('El producto no existe en la base de datos');
+          }
+
+          final data = snapshot.data() as Map<String, dynamic>;
+          final stockActual = data['stock'] ?? 0;
+
+          if (stockActual <= 0) {
+            throw Exception('Stock insuficiente');
+          }
+
+          transaction.update(docRef, {'stock': stockActual - 1});
+        });
+
+        notifyListeners();
+      } catch (e) {
+        throw Exception('Error al actualizar el stock: $e');
+      }
     } else {
-      _items.add(CartItem(producto: producto));
+      throw Exception('El producto no tiene stock disponible');
     }
-    notifyListeners();
   }
 
   void removeFromCart(Producto producto) {
@@ -52,7 +64,6 @@ class CartProvider extends ChangeNotifier {
   void clearCart() {
     _items.clear();
     notifyListeners();
-    debugPrint('Cart cleared');
   }
 
   int get totalItems => _items.fold(0, (sum, item) => sum + item.cantidad);
