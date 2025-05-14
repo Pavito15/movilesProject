@@ -143,8 +143,9 @@ class _ProfileState extends State<Profile> {
     if (userFirebase == null) {
       // Redirigir de inmediato si no hay sesión
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const Signin()),
+          (Route<dynamic> route) => false,
         );
       });
 
