@@ -7,16 +7,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
 import 'package:http/http.dart' as http;
+import 'package:project_v1/screens/login/signin.dart'; // 👈 Asegúrate de importar Signin
 
 class ShoppyCar extends StatelessWidget {
   const ShoppyCar({super.key});
-  // Función para procesar el pago con Stripe
+
   Future<void> _payWithStripe(BuildContext context, double total,
       List cartItems, CartProvider cartProvider) async {
     try {
-      // 1. Calcula el monto total en centavos (Stripe utiliza unidades menores de moneda)
-      final amount =
-          (total * 100).toInt(); // 2. Obtener el client_secret del backend
+      final amount = (total * 100).toInt();
+
       final response = await http.post(
         Uri.parse('http://192.168.100.46:3000/create-payment-intent'),
         headers: {'Content-Type': 'application/json'},
@@ -32,7 +32,6 @@ class ShoppyCar extends StatelessWidget {
       final jsonResponse = jsonDecode(response.body);
       final clientSecret = jsonResponse['clientSecret'];
 
-      // 3. Configurar el PaymentSheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret,
@@ -41,10 +40,8 @@ class ShoppyCar extends StatelessWidget {
         ),
       );
 
-      // 4. Mostrar el PaymentSheet
       await Stripe.instance.presentPaymentSheet();
 
-      // 5. Si llegamos aquí, el pago fue exitoso, guardamos la orden en Firestore
       final userId = FirebaseAuth.instance.currentUser!.uid;
       final products = cartItems
           .map((item) => {
@@ -59,7 +56,7 @@ class ShoppyCar extends StatelessWidget {
         'userId': userId,
         'products': products,
         'total': total,
-        'status': 'paid', // Marcamos como pagado
+        'status': 'paid',
         'paymentMethod': 'stripe',
         'createdAt': FieldValue.serverTimestamp(),
       });
@@ -71,12 +68,10 @@ class ShoppyCar extends StatelessWidget {
             content: Text('¡Pago exitoso! Su orden ha sido procesada')),
       );
     } on StripeException catch (e) {
-      // Capturamos excepciones específicas de Stripe
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error de pago: ${e.error.localizedMessage}')),
       );
     } catch (e) {
-      // Capturamos cualquier otra excepción
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
@@ -219,6 +214,21 @@ class ShoppyCar extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (cartProvider.items.isNotEmpty) {
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) => const Signin()),
+                            (Route<dynamic> route) => false,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Inicia sesión para procesar el pago')),
+                          );
+                          return;
+                        }
+
                         await _payWithStripe(context, cartProvider.totalPrice,
                             cartProvider.items, cartProvider);
                       }

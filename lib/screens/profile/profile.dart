@@ -104,6 +104,22 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final userFirebase = FirebaseAuth.instance.currentUser;
+
+    if (userFirebase == null) {
+      // Redirigir de inmediato si no hay sesión
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const Signin()),
+          (Route<dynamic> route) => false,
+        );
+      });
+
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final user = userProvider.user;
 
     // Construye la lista de items dinámicamente según el rol
