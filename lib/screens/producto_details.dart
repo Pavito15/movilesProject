@@ -233,28 +233,31 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                   const SizedBox(height: 20),
 
                   // Botón añadir al carrito
+                                    // ...existing code...
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
-                        for (int i = 0; i < cantidad; i++) {
-                          cartProvider.addToCart(widget.producto);
-                        }
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Producto agregado'),
-                              content: const Text('Se agregó al carrito correctamente.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                      onPressed: widget.producto.stock == 0
+                          ? null // Deshabilita el botón si no hay stock
+                          : () {
+                              for (int i = 0; i < cantidad; i++) {
+                                cartProvider.addToCart(widget.producto);
+                              }
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Producto agregado'),
+                                    content: const Text('Se agregó al carrito correctamente.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue.shade900,
                         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
@@ -262,12 +265,15 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      child: const Text(
-                        'Añadir a carrito',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      child: Text(
+                        widget.producto.stock == 0
+                            ? 'Sin stock'
+                            : 'Añadir a carrito',
+                        style: const TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),
+                  // ...existing code...
                 ],
               ),
             ),
@@ -290,51 +296,6 @@ class DetalleProductoScreenState extends State<DetalleProductoScreen> {
                     spreadRadius: 2,
                     blurRadius: 5,
                     offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Califica este producto',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  RatingBar(
-                    filledIcon: Icons.star,
-                    emptyIcon: Icons.star_border,
-                    halfFilledIcon: Icons.star_half,
-                    onRatingChanged: (rating) {
-                      setState(() {
-                        userRating = rating;
-                      });
-                    },
-                    initialRating: 0,
-                    maxRating: 5,
-                    size: 32,
-                    filledColor: Colors.amber,
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: userRating > 0
-                          ? () {
-                              _submitRating();
-                            }
-                          : null, // Deshabilita el botón si no se selecciona una calificación
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue.shade900,
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: const Text(
-                        'Enviar calificación',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
                   ),
                 ],
               ),
